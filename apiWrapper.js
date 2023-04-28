@@ -1,10 +1,10 @@
 import { DOMParser } from 'react-native-html-parser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const fiiesListurl = "http://atourcity.com/bkgoswami.com/wp/wp-content/uploads/allfiles.txt"
+const fiiesListurl = "http://atourcity.com/bkgoswami.com/wp/wp-content/uploads/all_files.txt"
 
 async function fetchFilesList(filesListUrl) {
-  const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+  const proxyUrl = '';
   const response = await fetch(proxyUrl + filesListUrl);
   const txt = await response.text();
 
@@ -39,7 +39,7 @@ async function loadCachedFiles() {
   }
 
   // Fetch the list of files and cache them
-  const files = await fetchFilesList(filesListUrl);
+  const files = await fetchFilesList(fiiesListurl);
   await cacheFiles(files);
   return files;
 }
