@@ -49,10 +49,90 @@ async function getAllFiles() {
   return files;
 }
 
-async function getRandomFile() {
-  const files = await getAllFiles();
-  const randomIndex = Math.floor(Math.random() * files.length);
-  return files[randomIndex];
+async function getPlayedFiles() {
+  const rawData = await AsyncStorage.getItem('playedFiles');
+  return rawData ? JSON.parse(rawData) : [];
 }
 
-export { getAllFiles, getRandomFile };
+// ... Other code ...
+
+async function setPlayedFile(file, index) {
+  const playedFiles = await getPlayedFiles();
+
+  if (typeof index === "number") {
+    playedFiles[index] = file;
+  } else {
+    playedFiles.push(file);
+  }
+
+  await AsyncStorage.setItem('playedFiles', JSON.stringify(playedFiles));
+}
+
+async function getCurrentIndex() {
+  const rawData = await AsyncStorage.getItem('currentIndex');
+  return rawData ? JSON.parse(rawData) : 0;
+}
+
+async function setCurrentIndex(index) {
+  await AsyncStorage.setItem('currentIndex', JSON.stringify(index));
+}
+
+async function getRandomFile() {
+  const files = await getAllFiles();
+  const playedFiles = await getPlayedFiles();
+
+  // Filter out the played files
+  const unplayedFiles = files.filter(file => !playedFiles.includes(file));
+
+  if (unplayedFiles.length === 0) {
+    // All files have been played, reset the played files list
+    await AsyncStorage.removeItem('playedFiles');
+    return getRandomFile(); // Retry with an empty played files list
+  }
+
+  const randomIndex = Math.floor(Math.random() * unplayedFiles.length);
+  const randomFile = unplayedFiles[randomIndex];
+  const currentIndex = playedFiles.length;
+  await setPlayedFile(randomFile, currentIndex);
+  await setCurrentIndex(currentIndex);
+  return randomFile;
+}
+
+async function getPreviousFile() {
+  const currentIndex = await getCurrentIndex();
+
+  if (currentIndex <= 0) {
+    return playedFiles[currentIndex]; // There is no previous file
+  }
+
+  const newIndex = currentIndex - 1;
+  await setCurrentIndex(newIndex);
+  const playedFiles = await getPlayedFiles();
+  return playedFiles[newIndex];
+}
+
+async function getNextFile() {
+  const playedFiles = await getPlayedFiles();
+  const currentIndex = await getCurrentIndex();
+  const allFiles = await getAllFiles();
+
+  if (currentIndex === allFiles.length - 1) {
+    // If there is no next file, return random
+    return getRandomFile();
+  }
+
+  const newIndex = currentIndex + 1;
+  if (playedFiles[newIndex]) {
+    // If the next file has already been played
+    await setCurrentIndex(newIndex);
+    return playedFiles[newIndex];
+  } else {
+    // If the next file has not been played
+    const nextFile = allFiles[newIndex];
+    await setPlayedFile(nextFile, newIndex);
+    await setCurrentIndex(newIndex);
+    return nextFile;
+  }
+}
+
+export { getAllFiles, getRandomFile, getPreviousFile, getNextFile };

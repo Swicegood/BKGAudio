@@ -2,15 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, SafeAreaView, StyleSheet, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import SplashScreen from './SplashScreen';
-import PlayButton from './PlayButton';
 import BasicMusicPlayer from './BasicMusicPlayer';
 
 
 const App = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const url = 'https://audio.iskcondesiretree.com/02_-_ISKCON_Swamis/ISKCON_Swamis_-_A_to_C/His_Holiness_Bir_Krishna_Goswami/Festivals/BKG_Festivals_-_Disappearance_Day_of_Srila_Lokanath_Goswami_-_2017-07-16_New_Goloka.mp3';
-
-
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
@@ -36,11 +33,8 @@ const App = () => {
             </View>
           </View>
           <SafeAreaView style={styles.buttonContainer}>
-                <BasicMusicPlayer url={url} />
-            </SafeAreaView>
-          {/* <View style={styles.buttonContainer}>
-            <PlayButton />
-          </View> */}
+                <BasicMusicPlayer />
+          </SafeAreaView>
         </>
       )}
       <StatusBar style="auto" />
