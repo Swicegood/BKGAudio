@@ -1,4 +1,4 @@
-import { DOMParser } from 'react-native-html-parser';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const fiiesListurl = "http://atourcity.com/bkgoswami.com/wp/wp-content/uploads/all_files.txt"
@@ -98,11 +98,15 @@ async function getRandomFile() {
   return randomFile;
 }
 
+
+
+
 async function getPreviousFile() {
   const currentIndex = await getCurrentIndex();
 
   if (currentIndex <= 0) {
-    return playedFiles[currentIndex]; // There is no previous file
+    const playedFiles = await getPlayedFiles();
+    return playedFiles[0]; // There is no previous file
   }
 
   const newIndex = currentIndex - 1;

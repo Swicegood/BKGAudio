@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
+import { debounce } from 'lodash';
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -20,6 +21,10 @@ const BasicMusicPlayer = () => {
   const [isLoading, setIsLoading] = useState(true);  
   const [songTitle, setSongTitle] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const isLoadingNewFile = useRef(false);
+  const [playState, setPlayState] = useState('idle');
+  const [playNext, setPlayNext] = useState(false);
+
 
   const loadRandomFile = async () => {
     const files = await getAllFiles();
@@ -34,10 +39,15 @@ const BasicMusicPlayer = () => {
     setIsLoading(false);
   };
 
-  const loadFile = async (fileUrl) => {
+   const loadFile = async (fileUrl) => {
+    if (playState === 'loading') return; // Prevent loading a new file if already in the process
+
+    setPlayState('loading');
+
     if (sound) {
       await sound.unloadAsync();
     }
+
     setUrl(fileUrl);
     const songTitle = fileUrl.split('/').pop().replace(/\.mp3$/, '');
     setSongTitle(songTitle);
@@ -47,48 +57,92 @@ const BasicMusicPlayer = () => {
     scrollAnim.setValue(0);
   };
 
-  const loadPreviousFile = async () => {
+  const debouncedLoadPreviousFile = useRef(debounce(async () => {
+    if (isLoadingNewFile.current) return;
+    isLoadingNewFile.current = true;
+
     resetAnimation();
     const previousFile = await getPreviousFile();
-    loadFile(previousFile);
+    await loadFile(previousFile);
+
+    isLoadingNewFile.current = false;
+  }, 300));
+  
+  const loadPreviousFile = async () => {
+    if (isLoadingNewFile) return;
+    isLoadingNewFile = true;
+
+    resetAnimation();
+    const previousFile = await getPreviousFile();
+    await loadFile(previousFile);
+
+    isLoadingNewFile = false;
   };
 
-  const loadNextFile = async () => {
+  const debouncedLoadNextFile = useRef(debounce(async () => {
+    if (isLoadingNewFile.current) return;
+    isLoadingNewFile.current = true;
+
     resetAnimation();
     const nextFile = await getNextFile();
-    loadFile(nextFile);
+    await loadFile(nextFile);
+
+    isLoadingNewFile.current = false;
+  }, 300));
+
+  const loadNextFile = async () => {
+    if (isLoadingNewFile) return;
+    isLoadingNewFile = true;
+
+    resetAnimation();
+    const nextFile = await getNextFile();
+    await loadFile(nextFile);
+
+    isLoadingNewFile = false;
   };
+  
 
 useEffect(() => {
   loadRandomFile();
 }, []);
 
-  useEffect(() => {
-    // ... Other useEffect hooks ...
-
-    const loadSound = async () => {
-      if (url) {
-        if (sound) {
-          await sound.unloadAsync();
-        }
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: url },
-          { shouldPlay: true } // Add this line to start playing automatically
-        );
-        setSound(newSound);
-        setIsPlaying(true); // Add this line to update the isPlaying state
-      }
-    };
-
-    loadSound();
-
-    return () => {
+useEffect(() => {
+  const loadSound = async () => {
+    if (url) {
       if (sound) {
-        sound.unloadAsync();
+        await sound.unloadAsync();
       }
-    };
-  }, [url]);
+      const { sound: newSound, status } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true } // Add this line to start playing automatically
+      );
+      setSound(newSound);
+      setIsPlaying(true); // Add this line to update the isPlaying state
+      setPlayState('playing');
 
+      newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
+        if (playbackStatus.didJustFinish) {
+          setPlayNext(true);
+        }
+      });
+    }
+  };
+
+  loadSound();
+
+  return () => {
+    if (sound) {
+      sound.unloadAsync();
+    }
+  };
+}, [url]);
+
+useEffect(() => {
+  if (playNext) {
+    debouncedLoadNextFile.current();
+    setPlayNext(false);
+  }
+}, [playNext]);
 
 useEffect(() => {
   if (songTitle) {
@@ -121,6 +175,7 @@ useEffect(() => {
     );
   }
 
+  
   return (
     <View style={styles.musicContainer}>
       <Animated.Text
@@ -131,7 +186,7 @@ useEffect(() => {
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={styles.prevButton}
-          onPress={loadPreviousFile}
+          onPress={debouncedLoadPreviousFile.current}
           disabled={!sound}
         >
           <Text style={styles.buttonText}>Prev</Text>
@@ -145,7 +200,7 @@ useEffect(() => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.nextButton}
-          onPress={loadNextFile}
+          onPress={debouncedLoadNextFile.current}
           disabled={!sound}
         >
           <Text style={styles.buttonText}>Next</Text>
