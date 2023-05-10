@@ -26,6 +26,26 @@ const BasicMusicPlayer = () => {
   const [playNext, setPlayNext] = useState(false);
 
 
+  const seekBackward = async () => {
+    if (sound) {
+      const playbackStatus = await sound.getStatusAsync();
+      const newPosition = Math.max(playbackStatus.positionMillis - 30000, 0);
+      await sound.setPositionAsync(newPosition);
+    }
+  };
+
+  const seekForward = async () => {
+    if (sound) {
+      const playbackStatus = await sound.getStatusAsync();
+      const newPosition = Math.min(
+        playbackStatus.positionMillis + 30000,
+        playbackStatus.durationMillis
+      );
+      await sound.setPositionAsync(newPosition);
+    }
+  };
+
+
   const loadRandomFile = async () => {
     const files = await getAllFiles();
     console.log('All files:', files);
@@ -66,7 +86,7 @@ const BasicMusicPlayer = () => {
     await loadFile(previousFile);
 
     isLoadingNewFile.current = false;
-  }, 300));
+  }, 1000));
   
   const loadPreviousFile = async () => {
     if (isLoadingNewFile) return;
@@ -88,7 +108,7 @@ const BasicMusicPlayer = () => {
     await loadFile(nextFile);
 
     isLoadingNewFile.current = false;
-  }, 300));
+  }, 1000));
 
   const loadNextFile = async () => {
     if (isLoadingNewFile) return;
@@ -176,6 +196,7 @@ useEffect(() => {
   }
 
   
+  
   return (
     <View style={styles.musicContainer}>
       <Animated.Text
@@ -192,11 +213,25 @@ useEffect(() => {
           <Text style={styles.buttonText}>Prev</Text>
         </TouchableOpacity>
         <TouchableOpacity
+          style={styles.seekBackwardButton}
+          onPress={seekBackward}
+          disabled={!sound}
+        >
+          <Text style={styles.buttonText}>-30s</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.button}
           onPress={togglePlayback}
           disabled={!sound}
         >
           <Text style={styles.buttonText}>{isPlaying ? "Pause" : "Play"}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.seekForwardButton}
+          onPress={seekForward}
+          disabled={!sound}
+        >
+          <Text style={styles.buttonText}>+30s</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.nextButton}
@@ -268,6 +303,27 @@ const styles = StyleSheet.create({
         height: 60,
         position: "relative",
     },
+    seekBackwardButton: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 5,
+      borderRadius: 50,
+      width: 60,
+      height: 60,
+      position: "relative",
+    },
+    seekForwardButton: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 5,
+      borderRadius: 50,
+      width: 60,
+      height: 60,
+      position: "relative",
+    },
+  
   });
   
 export default BasicMusicPlayer;
