@@ -29,7 +29,7 @@ const App = () => {
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.text}>
-                Your audio will start playing automtically!
+                Your audio will start playing automatically!
               </Text>
             </View>
           </View>
