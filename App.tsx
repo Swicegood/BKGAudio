@@ -5,6 +5,7 @@ import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
 
 
+
 const App = () => {
   const [isVisible, setIsVisible] = useState(true);
   
@@ -28,7 +29,7 @@ const App = () => {
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.text}>
-                Press the Play button to start downloading your audio!
+                Your audio will start playing automtically!
               </Text>
             </View>
           </View>

@@ -2,7 +2,8 @@
   "expo": {
     "name": "BKGAudio",
     "slug": "BKGAudio",
-    "version": "1.0.0",
+    "version": "1.1.0",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,16 +16,28 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.iskcon.bkgaudio",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
     },
     "android": {
-      "adaptiveIcon": {
+      "package": "com.iskcon.bkgaudio",
+      "adaptiveIcon": {        
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "83852b13-dc52-4dbd-a892-7b9db8971ec7"
+      }
     }
   }
 }

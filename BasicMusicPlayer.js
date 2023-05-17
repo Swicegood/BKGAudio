@@ -8,7 +8,7 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
-import { Audio } from "expo-av";
+import { Audio, InterruptionModeIOS,interruptionModeAndroid } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 
@@ -29,7 +29,7 @@ const BasicMusicPlayer = () => {
   const seekBackward = async () => {
     if (sound) {
       const playbackStatus = await sound.getStatusAsync();
-      const newPosition = Math.max(playbackStatus.positionMillis - 30000, 0);
+      const newPosition = Math.max(playbackStatus.positionMillis - 15000, 0);
       await sound.setPositionAsync(newPosition);
     }
   };
@@ -123,8 +123,12 @@ const BasicMusicPlayer = () => {
   
 
 useEffect(() => {
+  Audio.setAudioModeAsync({
+    staysActiveInBackground: true,
+  });
   loadRandomFile();
 }, []);
+
 
 useEffect(() => {
   const loadSound = async () => {
@@ -132,9 +136,22 @@ useEffect(() => {
       if (sound) {
         await sound.unloadAsync();
       }
+      try {
+        await Audio.setAudioModeAsync({
+          staysActiveInBackground: true,
+   //       interruptionModeAndroid: interruptionModeAndroid.DoNotMix,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: true,
+          allowsRecordingIOS: true,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          playsInSilentModeIOS: true,
+        });
+      } catch (error) {
+        console.log('Error setting audio mode:', error);
+      }
       const { sound: newSound, status } = await Audio.Sound.createAsync(
         { uri: url },
-        { shouldPlay: true } // Add this line to start playing automatically
+        { shouldPlay: true, staysActiveInBackground: true } // Add this line to start playing automatically
       );
       setSound(newSound);
       setIsPlaying(true); // Add this line to update the isPlaying state
@@ -217,7 +234,7 @@ useEffect(() => {
           onPress={seekBackward}
           disabled={!sound}
         >
-          <Text style={styles.buttonText}>-30s</Text>
+          <Text style={styles.buttonText}>-15s</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}

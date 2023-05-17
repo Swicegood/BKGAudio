@@ -8,8 +8,9 @@ async function fetchFilesList(filesListUrl) {
   const response = await fetch(proxyUrl + filesListUrl);
   const txt = await response.text();
 
-  // Split the text into lines and remove any empty lines
-  const files = txt.split('\n').filter(file => file.trim() !== '');
+  // Split the text into lines and remove any empty lines or lines starting with '#'
+  const files = txt.split('\n').filter(file => file.trim() !== '' && !file.trim().startsWith('#'));
+
 
   return files;
 }
