@@ -8,7 +8,7 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
-import { Audio, InterruptionModeIOS,interruptionModeAndroid } from "expo-av";
+import { Audio, InterruptionModeIOS } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 
@@ -47,17 +47,21 @@ const BasicMusicPlayer = () => {
 
 
   const loadRandomFile = async () => {
-    const files = await getAllFiles();
-    console.log('All files:', files);
-    const randomFile = await getRandomFile();
-    setUrl(randomFile);
-    console.log('Random file:', randomFile);
-
-    // Extract the song title from the URL
-    const songTitle = randomFile.split('/').pop().replace(/\.mp3$/, '');
-    setSongTitle(songTitle);
-    setIsLoading(false);
+    try {
+      const files = await getAllFiles();
+      console.log('All files:', files);
+      const randomFile = await getRandomFile();
+      setUrl(randomFile);
+      console.log('Random file:', randomFile);
+      const songTitle = randomFile.split('/').pop().replace(/\.mp3$/, '');
+      setSongTitle(songTitle);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error in loadRandomFile:', error);
+      // Do something with the error, e.g., show an error message
+    }
   };
+  
 
    const loadFile = async (fileUrl) => {
     if (playState === 'loading') return; // Prevent loading a new file if already in the process

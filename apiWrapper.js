@@ -46,8 +46,13 @@ async function loadCachedFiles() {
 }
 
 async function getAllFiles() {
+  try
+  {
   const files = await loadCachedFiles();
   return files;
+  } catch (error) {
+    console.error('Error in  getAllFiles:', error);
+  }
 }
 
 async function getPlayedFiles() {
@@ -79,6 +84,7 @@ async function setCurrentIndex(index) {
 }
 
 async function getRandomFile() {
+  try{
   const files = await getAllFiles();
   const playedFiles = await getPlayedFiles();
 
@@ -90,19 +96,24 @@ async function getRandomFile() {
     await AsyncStorage.removeItem('playedFiles');
     return getRandomFile(); // Retry with an empty played files list
   }
-
+  
   const randomIndex = Math.floor(Math.random() * unplayedFiles.length);
   const randomFile = unplayedFiles[randomIndex];
   const currentIndex = playedFiles.length;
   await setPlayedFile(randomFile, currentIndex);
   await setCurrentIndex(currentIndex);
   return randomFile;
+} catch (error) {
+  console.error('Error in getRandomFile:', error);
+}
 }
 
 
 
 
 async function getPreviousFile() {
+  try
+  {
   const currentIndex = await getCurrentIndex();
 
   if (currentIndex <= 0) {
@@ -114,9 +125,13 @@ async function getPreviousFile() {
   await setCurrentIndex(newIndex);
   const playedFiles = await getPlayedFiles();
   return playedFiles[newIndex];
+} catch (error) {
+  console.error('Error in getpreviousFile:', error);
+}
 }
 
 async function getNextFile() {
+  try{
   const playedFiles = await getPlayedFiles();
   const currentIndex = await getCurrentIndex();
   const allFiles = await getAllFiles();
@@ -138,6 +153,9 @@ async function getNextFile() {
     await setCurrentIndex(newIndex);
     return nextFile;
   }
+} catch (error) {
+  console.error('Error in geteNextFile:', error);
+}
 }
 
 export { getAllFiles, getRandomFile, getPreviousFile, getNextFile };

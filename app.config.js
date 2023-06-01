@@ -1,7 +1,7 @@
 module.exports = {
   name: "BKGAudio",
   slug: "bkgaudio",
-  version: "1.1.0",
+  version: "1.1.1",
   platforms: ["ios", "android"],
   orientation: "portrait",
   icon: "./assets/icon.png",
@@ -25,6 +25,7 @@ module.exports = {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
+    versionCode: 2
   },
   web: {
     favicon: "./assets/favicon.png",

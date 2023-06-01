@@ -2,7 +2,7 @@
   "expo": {
     "name": "BKGAudio",
     "slug": "BKGAudio",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,7 +29,8 @@
       "adaptiveIcon": {        
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
