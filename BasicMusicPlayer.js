@@ -25,6 +25,8 @@ const BasicMusicPlayer = () => {
   const isLoadingNewFile = useRef(false);
   const [playState, setPlayState] = useState('idle');
   const [playNext, setPlayNext] = useState(false);
+  const [isSoundLoading, setIsSoundLoading] = useState(false);
+  const [lastSongLoaded, setLastSongLoaded] = useState(false);
 
 
   const seekBackward = async () => {
@@ -64,20 +66,20 @@ const BasicMusicPlayer = () => {
   };
   
 
-   const loadFile = async (fileUrl) => {
-    if (playState === 'loading') return; // Prevent loading a new file if already in the process
-
+  const loadFile = async (fileUrl) => {
+    if (playState === 'loading') return;
+  
     setPlayState('loading');
-
+    setIsSoundLoading(true);
+  
     if (sound) {
       await sound.unloadAsync();
     }
-
-    setUrl(fileUrl);
+  
     const songTitle = fileUrl.split('/').pop().replace(/\.mp3$/, '');
     setSongTitle(songTitle);
   };
-
+  
   const resetAnimation = () => {
     scrollAnim.setValue(0);
   };
@@ -136,32 +138,42 @@ useEffect(() => {
 
 
 useEffect(() => {
+  if (!lastSongLoaded) {
+    return; // if the last song hasn't been loaded yet, do nothing
+  }
   const loadSound = async () => {
+    // Check if a sound is currently being loaded
+    if (isSoundLoading) {
+      return;
+    }
+    setIsSoundLoading(true);
+  
     let songUrl = url;
     let lastPosition = 0;
-
+  
     // Try to get the last song and position from AsyncStorage
     try {
       const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
       const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
-
+      console.log('lastsong in loadsound: ', lastSongUrl)
+  
       if (lastSongUrl) {
         songUrl = lastSongUrl;
-        const songTitle = lastSongUrl.split('/').pop().replace(/\.mp3$/, '');
+        const songTitle = songUrl.split('/').pop().replace(/\.mp3$/, '');
         setSongTitle(songTitle);
       }
-
+  
       if (lastSongPosition) {
         lastPosition = Number(lastSongPosition);
       }
     } catch (error) {
       console.error('Failed to load the last song and position from AsyncStorage:', error);
     }
-
+  
     if (sound) {
       await sound.unloadAsync();
     }
-
+  
     try {
       await Audio.setAudioModeAsync({
         staysActiveInBackground: true,
@@ -175,21 +187,22 @@ useEffect(() => {
     } catch (error) {
       console.log('Error setting audio mode:', error);
     }
-
+  
     const { sound: newSound, status } = await Audio.Sound.createAsync(
       { uri: songUrl },
       { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
     );
-
+  
     setSound(newSound);
     setIsPlaying(true);
     setPlayState('playing');
-
+    setIsLoading(false); // Set isLoading back to false here
+  
     newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
       if (playbackStatus.didJustFinish) {
         setPlayNext(true);
       }
-
+  
       // Save current song and position to AsyncStorage
       try {
         await AsyncStorage.setItem('lastSongUrl', songUrl);
@@ -198,17 +211,18 @@ useEffect(() => {
         console.error('Failed to save the current song and position to AsyncStorage:', error);
       }
     });
+  
+    setIsSoundLoading(false);
   };
-
+  
   loadSound();
-
+  
   return () => {
     if (sound) {
       sound.unloadAsync();
     }
   };
-}, [url]);
-
+}, [url, lastSongLoaded]);
 
 useEffect(() => {
   if (playNext) {
@@ -229,6 +243,43 @@ useEffect(() => {
     ).start();
   }
 }, [songTitle]);
+
+useEffect(() => {
+  const loadLastSong = async () => {
+    let songUrl = null;
+    let lastPosition = 0;
+
+    try {
+      const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
+      const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+      console.log('lastsong:  ', lastSongUrl)
+
+      if (lastSongUrl) {
+        songUrl = lastSongUrl;
+        const songTitle = songUrl.split('/').pop().replace(/\.mp3$/, '');
+        setSongTitle(songTitle);
+      }
+
+      if (lastSongPosition) {
+        lastPosition = Number(lastSongPosition);
+      }
+    } catch (error) {
+      console.error('Failed to load the last song and position from AsyncStorage:', error);
+    }
+
+    if (songUrl) {
+      setUrl(songUrl);
+    } else {
+      loadRandomFile();
+    }
+    setLastSongLoaded(true); // indicate that the last song has been loaded
+  };
+
+  loadLastSong();
+}, []);
+
+
+
   
   const togglePlayback = async () => {
     if (isPlaying) {
