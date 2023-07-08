@@ -8,6 +8,7 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio, InterruptionModeIOS } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
@@ -136,37 +137,67 @@ useEffect(() => {
 
 useEffect(() => {
   const loadSound = async () => {
-    if (url) {
-      if (sound) {
-        await sound.unloadAsync();
-      }
-      try {
-        await Audio.setAudioModeAsync({
-          staysActiveInBackground: true,
-   //       interruptionModeAndroid: interruptionModeAndroid.DoNotMix,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: true,
-          allowsRecordingIOS: true,
-          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-          playsInSilentModeIOS: true,
-        });
-      } catch (error) {
-        console.log('Error setting audio mode:', error);
-      }
-      const { sound: newSound, status } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true, staysActiveInBackground: true } // Add this line to start playing automatically
-      );
-      setSound(newSound);
-      setIsPlaying(true); // Add this line to update the isPlaying state
-      setPlayState('playing');
+    let songUrl = url;
+    let lastPosition = 0;
 
-      newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
-        if (playbackStatus.didJustFinish) {
-          setPlayNext(true);
-        }
-      });
+    // Try to get the last song and position from AsyncStorage
+    try {
+      const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
+      const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+
+      if (lastSongUrl) {
+        songUrl = lastSongUrl;
+        const songTitle = lastSongUrl.split('/').pop().replace(/\.mp3$/, '');
+        setSongTitle(songTitle);
+      }
+
+      if (lastSongPosition) {
+        lastPosition = Number(lastSongPosition);
+      }
+    } catch (error) {
+      console.error('Failed to load the last song and position from AsyncStorage:', error);
     }
+
+    if (sound) {
+      await sound.unloadAsync();
+    }
+
+    try {
+      await Audio.setAudioModeAsync({
+        staysActiveInBackground: true,
+        // interruptionModeAndroid: interruptionModeAndroid.DoNotMix,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: true,
+        allowsRecordingIOS: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        playsInSilentModeIOS: true,
+      });
+    } catch (error) {
+      console.log('Error setting audio mode:', error);
+    }
+
+    const { sound: newSound, status } = await Audio.Sound.createAsync(
+      { uri: songUrl },
+      { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
+    );
+
+    setSound(newSound);
+    setIsPlaying(true);
+    setPlayState('playing');
+
+    newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
+      if (playbackStatus.didJustFinish) {
+        setPlayNext(true);
+      }
+
+      // Save current song and position to AsyncStorage
+      try {
+        await AsyncStorage.setItem('lastSongUrl', songUrl);
+        await AsyncStorage.setItem('lastSongPosition', playbackStatus.positionMillis.toString());
+      } catch (error) {
+        console.error('Failed to save the current song and position to AsyncStorage:', error);
+      }
+    });
   };
 
   loadSound();
@@ -177,6 +208,7 @@ useEffect(() => {
     }
   };
 }, [url]);
+
 
 useEffect(() => {
   if (playNext) {
