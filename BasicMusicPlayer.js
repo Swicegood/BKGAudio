@@ -16,6 +16,7 @@ import { debounce } from 'lodash';
 const { width: screenWidth } = Dimensions.get("window");
 
 const BasicMusicPlayer = () => {
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [sound, setSound] = useState(null);
   const [url, setUrl] = useState(null);
@@ -26,7 +27,6 @@ const BasicMusicPlayer = () => {
   const [playState, setPlayState] = useState('idle');
   const [playNext, setPlayNext] = useState(false);
   const [isSoundLoading, setIsSoundLoading] = useState(false);
-  const [lastSongLoaded, setLastSongLoaded] = useState(false);
 
 
   const seekBackward = async () => {
@@ -87,11 +87,12 @@ const BasicMusicPlayer = () => {
   const debouncedLoadPreviousFile = useRef(debounce(async () => {
     if (isLoadingNewFile.current) return;
     isLoadingNewFile.current = true;
-
-    resetAnimation();
+   
     const previousFile = await getPreviousFile();
-    console.log("previousfile", previousFile)
-    await loadFile(previousFile);
+    if (previousFile !== 0) {
+      resetAnimation();
+      await loadFile(previousFile);
+    }
 
     isLoadingNewFile.current = false;
   }, 1000));
@@ -159,10 +160,12 @@ useEffect(() => {
 
     // Try to get the last song and position from AsyncStorage
     try {
-      const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
-
-      if (lastSongPosition) {
-        lastPosition = Number(lastSongPosition);
+      if (isFirstLoad) {
+        const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+        if (lastSongPosition) {
+          lastPosition = Number(lastSongPosition);
+        }
+        setIsFirstLoad(false); // Set isFirstLoad to false after using it
       }
     } catch (error) {
       console.error('Failed to load the last song and position from AsyncStorage:', error);

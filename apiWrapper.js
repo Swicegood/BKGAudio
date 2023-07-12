@@ -117,8 +117,7 @@ async function getPreviousFile() {
   const currentIndex = await getCurrentIndex();
 
   if (currentIndex <= 0) {
-    const playedFiles = await getPlayedFiles();
-    return playedFiles[0]; // There is no previous file
+    return 0; // There is no previous file
   }
 
   const newIndex = currentIndex - 1;
