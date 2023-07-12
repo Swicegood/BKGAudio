@@ -52,7 +52,6 @@ const BasicMusicPlayer = () => {
   const loadRandomFile = async () => {
     try {
       const files = await getAllFiles();
-      console.log('All files:', files);
       const randomFile = await getRandomFile();
       setUrl(randomFile);
       console.log('Random file:', randomFile);
@@ -67,7 +66,7 @@ const BasicMusicPlayer = () => {
   
 
   const loadFile = async (fileUrl) => {
-    if (playState === 'loading') return;
+    if (playState === 'loading' || isSoundLoading) return;
   
     setPlayState('loading');
     setIsSoundLoading(true);
@@ -78,6 +77,7 @@ const BasicMusicPlayer = () => {
   
     const songTitle = fileUrl.split('/').pop().replace(/\.mp3$/, '');
     setSongTitle(songTitle);
+    setUrl(fileUrl); // Set the url to the new fileUrl
   };
   
   const resetAnimation = () => {
@@ -90,94 +90,91 @@ const BasicMusicPlayer = () => {
 
     resetAnimation();
     const previousFile = await getPreviousFile();
+    console.log("previousfile", previousFile)
     await loadFile(previousFile);
 
     isLoadingNewFile.current = false;
   }, 1000));
   
-  const loadPreviousFile = async () => {
-    if (isLoadingNewFile) return;
-    isLoadingNewFile = true;
-
-    resetAnimation();
-    const previousFile = await getPreviousFile();
-    await loadFile(previousFile);
-
-    isLoadingNewFile = false;
-  };
-
+ 
   const debouncedLoadNextFile = useRef(debounce(async () => {
     if (isLoadingNewFile.current) return;
     isLoadingNewFile.current = true;
 
     resetAnimation();
     const nextFile = await getNextFile();
+    console.log("nextfile", nextFile)
     await loadFile(nextFile);
 
     isLoadingNewFile.current = false;
   }, 1000));
 
-  const loadNextFile = async () => {
-    if (isLoadingNewFile) return;
-    isLoadingNewFile = true;
 
-    resetAnimation();
-    const nextFile = await getNextFile();
-    await loadFile(nextFile);
-
-    isLoadingNewFile = false;
-  };
-  
-
+// Initial song loading
 useEffect(() => {
-  Audio.setAudioModeAsync({
-    staysActiveInBackground: true,
-  });
-  loadRandomFile();
-}, []);
-
-
-useEffect(() => {
-  if (!lastSongLoaded) {
-    return; // if the last song hasn't been loaded yet, do nothing
-  }
-  const loadSound = async () => {
-    // Check if a sound is currently being loaded
-    if (isSoundLoading) {
-      return;
-    }
-    setIsSoundLoading(true);
-  
-    let songUrl = url;
+  const loadLastSong = async () => {
+    let songUrl = null;
     let lastPosition = 0;
-  
-    // Try to get the last song and position from AsyncStorage
+
     try {
       const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
       const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
-      console.log('lastsong in loadsound: ', lastSongUrl)
-  
+      console.log('lastsong, lastsongposition :  ', lastSongUrl, lastSongPosition)
+
       if (lastSongUrl) {
         songUrl = lastSongUrl;
         const songTitle = songUrl.split('/').pop().replace(/\.mp3$/, '');
         setSongTitle(songTitle);
       }
-  
+
       if (lastSongPosition) {
         lastPosition = Number(lastSongPosition);
       }
     } catch (error) {
       console.error('Failed to load the last song and position from AsyncStorage:', error);
     }
+
+    if (songUrl) {
+      setUrl(songUrl);
+    } else {
+      loadRandomFile();
+    }
+  };
+
+  loadLastSong();
+}, []);
+
+// Song changing
+useEffect(() => {
+  if (!url) {
+    return;
+  }
+
+  const loadSound = async () => {
+ 
+    setIsSoundLoading(true);
   
+    let songUrl = url;
+    let lastPosition = 0;
+
+    // Try to get the last song and position from AsyncStorage
+    try {
+      const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+
+      if (lastSongPosition) {
+        lastPosition = Number(lastSongPosition);
+      }
+    } catch (error) {
+      console.error('Failed to load the last song and position from AsyncStorage:', error);
+    }
+
     if (sound) {
       await sound.unloadAsync();
     }
-  
+
     try {
       await Audio.setAudioModeAsync({
         staysActiveInBackground: true,
-        // interruptionModeAndroid: interruptionModeAndroid.DoNotMix,
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: true,
         allowsRecordingIOS: true,
@@ -192,18 +189,17 @@ useEffect(() => {
       { uri: songUrl },
       { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
     );
-  
+
     setSound(newSound);
     setIsPlaying(true);
     setPlayState('playing');
-    setIsLoading(false); // Set isLoading back to false here
+    setIsLoading(false);
   
     newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
       if (playbackStatus.didJustFinish) {
         setPlayNext(true);
       }
   
-      // Save current song and position to AsyncStorage
       try {
         await AsyncStorage.setItem('lastSongUrl', songUrl);
         await AsyncStorage.setItem('lastSongPosition', playbackStatus.positionMillis.toString());
@@ -216,13 +212,9 @@ useEffect(() => {
   };
   
   loadSound();
-  
-  return () => {
-    if (sound) {
-      sound.unloadAsync();
-    }
-  };
-}, [url, lastSongLoaded]);
+
+}, [url]);
+
 
 useEffect(() => {
   if (playNext) {
@@ -244,39 +236,7 @@ useEffect(() => {
   }
 }, [songTitle]);
 
-useEffect(() => {
-  const loadLastSong = async () => {
-    let songUrl = null;
-    let lastPosition = 0;
 
-    try {
-      const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
-      const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
-      console.log('lastsong:  ', lastSongUrl)
-
-      if (lastSongUrl) {
-        songUrl = lastSongUrl;
-        const songTitle = songUrl.split('/').pop().replace(/\.mp3$/, '');
-        setSongTitle(songTitle);
-      }
-
-      if (lastSongPosition) {
-        lastPosition = Number(lastSongPosition);
-      }
-    } catch (error) {
-      console.error('Failed to load the last song and position from AsyncStorage:', error);
-    }
-
-    if (songUrl) {
-      setUrl(songUrl);
-    } else {
-      loadRandomFile();
-    }
-    setLastSongLoaded(true); // indicate that the last song has been loaded
-  };
-
-  loadLastSong();
-}, []);
 
 
 
@@ -298,8 +258,6 @@ useEffect(() => {
       </View>
     );
   }
-
-  
   
   return (
     <View style={styles.musicContainer}>

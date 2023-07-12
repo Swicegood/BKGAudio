@@ -124,6 +124,7 @@ async function getPreviousFile() {
   const newIndex = currentIndex - 1;
   await setCurrentIndex(newIndex);
   const playedFiles = await getPlayedFiles();
+  console.log("Previous file :", playedFiles[newIndex])
   return playedFiles[newIndex];
 } catch (error) {
   console.error('Error in getpreviousFile:', error);
