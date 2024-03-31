@@ -179,8 +179,8 @@ useEffect(() => {
       await Audio.setAudioModeAsync({
         staysActiveInBackground: true,
         shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: true,
-        allowsRecordingIOS: true,
+        playThroughEarpieceAndroid: false,
+        allowsRecordingIOS: false,
         interruptionModeIOS: InterruptionModeIOS.DoNotMix,
         playsInSilentModeIOS: true,
       });
