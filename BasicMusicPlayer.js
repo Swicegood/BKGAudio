@@ -15,7 +15,7 @@ import { debounce } from 'lodash';
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const BasicMusicPlayer = () => {
+const BasicMusicPlayer = ({ onSongLoaded }) => {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [sound, setSound] = useState(null);
@@ -212,11 +212,12 @@ useEffect(() => {
     });
   
     setIsSoundLoading(false);
+    onSongLoaded(true);
   };
   
   loadSound();
 
-}, [url]);
+}, [url, onSongLoaded]);
 
 
 useEffect(() => {
@@ -267,7 +268,7 @@ useEffect(() => {
       <Animated.Text
         style={[styles.songTitle, { transform: [{ translateX: scrollAnim }] }]}
       >
-        {songTitle}
+        {songTitle.replace(/_/g, " ")}
       </Animated.Text>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity

@@ -8,7 +8,8 @@ import BasicMusicPlayer from './BasicMusicPlayer';
 
 const App = () => {
   const [isVisible, setIsVisible] = useState(true);
-  
+  const [isSongLoaded, setIsSongLoaded] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
@@ -28,13 +29,15 @@ const App = () => {
               <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
             </View>
             <View style={styles.textContainer}>
-              <Text style={styles.text}>
-                Your audio will start playing automatically!
-              </Text>
+              {!isSongLoaded && (
+                <Text style={styles.text}>
+                  Your audio will start playing automatically!
+                </Text>
+              )}
             </View>
           </View>
           <SafeAreaView style={styles.buttonContainer}>
-                <BasicMusicPlayer />
+            <BasicMusicPlayer onSongLoaded={setIsSongLoaded} />
           </SafeAreaView>
         </>
       )}

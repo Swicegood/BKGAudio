@@ -154,7 +154,7 @@ async function getNextFile() {
     return nextFile;
   }
 } catch (error) {
-  console.error('Error in geteNextFile:', error);
+  console.error('Error in getNextFile:', error);
 }
 }
 
