@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio, InterruptionModeIOS } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -114,11 +115,11 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
     musicContainer: {
       alignItems: "center",
       justifyContent: "flex-end",
-      height: screenHeight * 0.4, // Use 40% of the screen height
+      height: screenHeight * 0.4,
       width: screenWidth,
     },
     songTitleContainer: {
-      height: screenHeight * 0.1, // Use 10% of the screen height for the title
+      height: screenHeight * 0.1,
       justifyContent: "center",
       alignItems: "center",
       overflow: "hidden",
@@ -134,7 +135,7 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
       justifyContent: "space-around",
       alignItems: "center",
       width: screenWidth,
-      height: screenHeight * 0.15, // Use 15% of the screen height for buttons
+      height: screenHeight * 0.15,
     },
     button: {
       backgroundColor: "#C68446",
@@ -145,39 +146,7 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
       width: 70,
       height: 70,
     },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: "bold",
-      color: "#FFFFFF",
-    },
-    prevButton: {
-      backgroundColor: "#C68446",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 5,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-    },
-    nextButton: {
-      backgroundColor: "#C68446",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 5,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-    },
-    seekBackwardButton: {
-      backgroundColor: "#C68446",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 5,
-      borderRadius: 50,
-      width: 50,
-      height: 50,
-    },
-    seekForwardButton: {
+    smallButton: {
       backgroundColor: "#C68446",
       justifyContent: "center",
       alignItems: "center",
@@ -320,11 +289,6 @@ useEffect(() => {
   }
 }, [songTitle]);
 
-
-
-
-
-  
   const togglePlayback = async () => {
     if (isPlaying) {
       await sound.pauseAsync();
@@ -357,39 +321,39 @@ useEffect(() => {
       </View>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
-          style={styles.prevButton}
+          style={styles.smallButton}
           onPress={debouncedLoadPreviousFile.current}
           disabled={!sound}
         >
-          <Text style={styles.buttonText}>Prev</Text>
+          <Icon name="skip-previous" size={30} color="#FFFFFF" />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.seekBackwardButton}
+          style={styles.smallButton}
           onPress={seekBackward}
           disabled={!sound}
         >
-          <Text style={styles.buttonText}>-15s</Text>
+          <Icon name="replay-10" size={30} color="#FFFFFF" />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
           onPress={togglePlayback}
           disabled={!sound}
         >
-          <Text style={styles.buttonText}>{isPlaying ? "Pause" : "Play"}</Text>
+          <Icon name={isPlaying ? "pause" : "play-arrow"} size={40} color="#FFFFFF" />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.seekForwardButton}
+          style={styles.smallButton}
           onPress={seekForward}
           disabled={!sound}
         >
-          <Text style={styles.buttonText}>+30s</Text>
+          <Icon name="forward-30" size={30} color="#FFFFFF" />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.nextButton}
+          style={styles.smallButton}
           onPress={debouncedLoadNextFile.current}
           disabled={!sound}
         >
-          <Text style={styles.buttonText}>Next</Text>
+          <Icon name="skip-next" size={30} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
     </View>
