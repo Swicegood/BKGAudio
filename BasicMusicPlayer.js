@@ -110,6 +110,85 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
     isLoadingNewFile.current = false;
   }, 1000));
 
+  const styles = StyleSheet.create({
+    musicContainer: {
+      alignItems: "center",
+      justifyContent: "flex-end",
+      height: screenHeight * 0.4, // Use 40% of the screen height
+      width: screenWidth,
+    },
+    songTitleContainer: {
+      height: screenHeight * 0.1, // Use 10% of the screen height for the title
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: "hidden",
+      width: screenWidth,
+    },
+    songTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    buttonsContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+      width: screenWidth,
+      height: screenHeight * 0.15, // Use 15% of the screen height for buttons
+    },
+    button: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 10,
+      borderRadius: 50,
+      width: 70,
+      height: 70,
+    },
+    buttonText: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: "#FFFFFF",
+    },
+    prevButton: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 5,
+      borderRadius: 50,
+      width: 50,
+      height: 50,
+    },
+    nextButton: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 5,
+      borderRadius: 50,
+      width: 50,
+      height: 50,
+    },
+    seekBackwardButton: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 5,
+      borderRadius: 50,
+      width: 50,
+      height: 50,
+    },
+    seekForwardButton: {
+      backgroundColor: "#C68446",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 5,
+      borderRadius: 50,
+      width: 50,
+      height: 50,
+    },
+  });
+
+
 
 // Initial song loading
 useEffect(() => {
@@ -266,11 +345,16 @@ useEffect(() => {
   
   return (
     <View style={styles.musicContainer}>
-      <Animated.Text
-        style={[styles.songTitle, { transform: [{ translateX: scrollAnim }] }]}
-      >
-        {songTitle.replace(/_/g, " ")}
-      </Animated.Text>
+      <View style={styles.songTitleContainer}>
+        <Animated.Text
+          style={[
+            styles.songTitle,
+            { transform: [{ translateX: scrollAnim }] }
+          ]}
+        >
+          {songTitle.replace(/_/g, " ")}
+        </Animated.Text>
+      </View>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={styles.prevButton}
@@ -312,85 +396,4 @@ useEffect(() => {
   );
 };
 
-
-const styles = StyleSheet.create({
-    musicContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: 50, // Add some margin to separate the title and the button
-    },
-    songTitle: {
-      position: "absolute",
-      fontSize: 24,
-      fontWeight: "bold",
-      width: screenWidth * 2, // Change paddingHorizontal to width and multiply by 2
-      textAlign: "center",
-      zIndex: 1,
-      top: -70, // Adjust the position to be above the button
-      left: 0,
-    },
-    button: {
-      backgroundColor: "#C68446",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 10,
-      borderRadius: 50,
-      width: 80,
-      height: 80,
-      position: "relative",
-    },
-    buttonText: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: "#FFFFFF",
-    },
-    buttonsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        width: screenWidth,
-    },
-    prevButton: {
-        backgroundColor: "#C68446",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 5,
-        borderRadius: 50,
-        width: 60,
-        height: 60,
-        position: "relative",
-    },
-    nextButton: {
-        backgroundColor: "#C68446",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 5,
-        borderRadius: 50,
-        width: 60,
-        height: 60,
-        position: "relative",
-    },
-    seekBackwardButton: {
-      backgroundColor: "#C68446",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 5,
-      borderRadius: 50,
-      width: 60,
-      height: 60,
-      position: "relative",
-    },
-    seekForwardButton: {
-      backgroundColor: "#C68446",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 5,
-      borderRadius: 50,
-      width: 60,
-      height: 60,
-      position: "relative",
-    },
-  
-  });
-  
 export default BasicMusicPlayer;
