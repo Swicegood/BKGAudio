@@ -13,6 +13,7 @@ import { Audio, InterruptionModeIOS } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -111,6 +112,8 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
     isLoadingNewFile.current = false;
   }, 1000));
 
+  const [titleWidth, setTitleWidth] = useState(0);
+
   const styles = StyleSheet.create({
     musicContainer: {
       alignItems: "center",
@@ -122,13 +125,19 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
       height: screenHeight * 0.1,
       justifyContent: "center",
       alignItems: "center",
-      overflow: "hidden",
       width: screenWidth,
+      overflow: "hidden",
     },
     songTitle: {
       fontSize: 20,
       fontWeight: "bold",
       textAlign: "center",
+    },
+    titleGradient: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      width: 20,
     },
     buttonsContainer: {
       flexDirection: "row",
@@ -156,6 +165,27 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
       height: 50,
     },
   });
+
+  useEffect(() => {
+    if (titleWidth > screenWidth) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scrollAnim, {
+            toValue: -(titleWidth - screenWidth),
+            duration: 15000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scrollAnim, {
+            toValue: 0,
+            duration: 15000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      scrollAnim.setValue(0);
+    }
+  }, [titleWidth, songTitle]);
 
 
 
@@ -276,19 +306,6 @@ useEffect(() => {
   }
 }, [playNext]);
 
-useEffect(() => {
-  if (songTitle) {
-    Animated.loop(
-      Animated.timing(scrollAnim, {
-        toValue: -(screenWidth * 2), // Change toValue to -(screenWidth * 2)
-        duration: 15000, // Increase the duration to 15000ms (15 seconds)
-        useNativeDriver: true,
-        delay: 500,
-      })
-    ).start();
-  }
-}, [songTitle]);
-
   const togglePlayback = async () => {
     if (isPlaying) {
       await sound.pauseAsync();
@@ -297,6 +314,10 @@ useEffect(() => {
       await sound.playAsync();
       setIsPlaying(true);
     }
+  };
+
+  const onTitleLayout = (event) => {
+    setTitleWidth(event.nativeEvent.layout.width);
   };
 
   if (isLoading) {
@@ -310,14 +331,23 @@ useEffect(() => {
   return (
     <View style={styles.musicContainer}>
       <View style={styles.songTitleContainer}>
-        <Animated.Text
-          style={[
-            styles.songTitle,
-            { transform: [{ translateX: scrollAnim }] }
-          ]}
-        >
-          {songTitle.replace(/_/g, " ")}
-        </Animated.Text>
+        <Animated.View style={{ transform: [{ translateX: scrollAnim }] }}>
+          <Text style={styles.songTitle} onLayout={onTitleLayout}>
+            {songTitle.replace(/_/g, " ")}
+          </Text>
+        </Animated.View>
+        <LinearGradient
+          colors={['rgba(237, 201, 146, 1)', 'rgba(237, 201, 146, 0)']}
+          start={{x: 0, y: 0.5}}
+          end={{x: 1, y: 0.5}}
+          style={[styles.titleGradient, { left: 0 }]}
+        />
+        <LinearGradient
+          colors={['rgba(237, 201, 146, 0)', 'rgba(237, 201, 146, 1)']}
+          start={{x: 0, y: 0.5}}
+          end={{x: 1, y: 0.5}}
+          style={[styles.titleGradient, { right: 0 }]}
+        />
       </View>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
