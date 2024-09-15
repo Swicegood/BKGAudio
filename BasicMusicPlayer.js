@@ -13,7 +13,7 @@ import { Audio, InterruptionModeIOS } from "expo-av";
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const BasicMusicPlayer = ({ onSongLoaded }) => {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -152,30 +152,28 @@ useEffect(() => {
   }
 
   const loadSound = async () => {
- 
+
     setIsSoundLoading(true);
   
     let songUrl = url;
     let lastPosition = 0;
 
-    // Try to get the last song and position from AsyncStorage
+      // Try to get the last song and position from AsyncStorage
     try {
       if (isFirstLoad) {
         const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
         if (lastSongPosition) {
           lastPosition = Number(lastSongPosition);
+        } else {
+          lastPosition = 0;
         }
-        setIsFirstLoad(false); // Set isFirstLoad to false after using it
+        setIsFirstLoad(false);
       }
-    } catch (error) {
-      console.error('Failed to load the last song and position from AsyncStorage:', error);
-    }
-
-    if (sound) {
-      await sound.unloadAsync();
-    }
-
-    try {
+  
+      if (sound) {
+        await sound.unloadAsync();
+      }
+  
       await Audio.setAudioModeAsync({
         staysActiveInBackground: true,
         shouldDuckAndroid: true,
@@ -184,35 +182,38 @@ useEffect(() => {
         interruptionModeIOS: InterruptionModeIOS.DoNotMix,
         playsInSilentModeIOS: true,
       });
+  
+      const { sound: newSound, status } = await Audio.Sound.createAsync(
+        { uri: songUrl },
+        { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
+      );
+  
+      setSound(newSound);
+      setIsPlaying(true);
+      setPlayState('playing');
+      setIsLoading(false);
+  
+      newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
+        if (playbackStatus.didJustFinish) {
+          setPlayNext(true);
+        }
+  
+        try {
+          await AsyncStorage.setItem('lastSongUrl', songUrl);
+          await AsyncStorage.setItem('lastSongPosition', playbackStatus.positionMillis.toString());
+        } catch (error) {
+          console.error('Failed to save the current song and position to AsyncStorage:', error);
+        }
+      });
+  
+      // Move these calls inside the try block, after all async operations
+      setIsSoundLoading(false);
+      onSongLoaded(true);
     } catch (error) {
-      console.log('Error setting audio mode:', error);
+      console.error('Error loading sound:', error);
+      setIsSoundLoading(false);
+      // Consider setting some error state here
     }
-  
-    const { sound: newSound, status } = await Audio.Sound.createAsync(
-      { uri: songUrl },
-      { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
-    );
-
-    setSound(newSound);
-    setIsPlaying(true);
-    setPlayState('playing');
-    setIsLoading(false);
-  
-    newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
-      if (playbackStatus.didJustFinish) {
-        setPlayNext(true);
-      }
-  
-      try {
-        await AsyncStorage.setItem('lastSongUrl', songUrl);
-        await AsyncStorage.setItem('lastSongPosition', playbackStatus.positionMillis.toString());
-      } catch (error) {
-        console.error('Failed to save the current song and position to AsyncStorage:', error);
-      }
-    });
-  
-    setIsSoundLoading(false);
-    onSongLoaded(true);
   };
   
   loadSound();

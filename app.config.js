@@ -1,7 +1,7 @@
 module.exports = {
   name: "BKGAudio",
   slug: "bkgaudio",
-  version: "1.3.2",
+  version: "1.3.4",
   platforms: ["ios", "android"],
   orientation: "portrait",
   icon: "./assets/icon.png",
@@ -18,7 +18,7 @@ module.exports = {
     infoPlist: {
       UIBackgroundModes: ["audio"],
     },
-    buildNumber: "6",
+    buildNumber: "8",
   },
   android: {
     package: "com.iskcon.bkgaudio",

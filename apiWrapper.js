@@ -1,7 +1,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const fiiesListurl = "http://atourcity.com/bkgoswami.com/wp/wp-content/uploads/all_files.txt"
+const fiiesListurl = "https://atourcity.com/bkgoswami.com/wp/wp-content/uploads/all_files.txt"
 
 async function fetchFilesList(filesListUrl) {
   const proxyUrl = '';
