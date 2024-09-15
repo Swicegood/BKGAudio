@@ -29,6 +29,9 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
   const [playState, setPlayState] = useState('idle');
   const [playNext, setPlayNext] = useState(false);
   const [isSoundLoading, setIsSoundLoading] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
 
   const seekBackward = async () => {
@@ -163,6 +166,23 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
       borderRadius: 50,
       width: 50,
       height: 50,
+    },
+    progressContainer: {
+      width: screenWidth * 0.9,
+      height: 20,
+      backgroundColor: '#e0e0e0',
+      borderRadius: 10,
+      overflow: 'hidden',
+      marginBottom: 10,
+    },
+    progressBar: {
+      height: '100%',
+      backgroundColor: '#C68446',
+    },
+    timeText: {
+      fontSize: 12,
+      color: '#333',
+      marginTop: 5,
     },
   });
 
@@ -320,6 +340,33 @@ useEffect(() => {
     setTitleWidth(event.nativeEvent.layout.width);
   };
 
+  const formatTime = (milliseconds) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
+  useEffect(() => {
+    if (sound) {
+      const updateProgress = async () => {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          setDuration(status.durationMillis);
+          setPosition(status.positionMillis);
+          Animated.timing(progressAnim, {
+            toValue: status.positionMillis / status.durationMillis,
+            duration: 1000,
+            useNativeDriver: false,
+          }).start();
+        }
+      };
+
+      const interval = setInterval(updateProgress, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [sound]);
+
   if (isLoading) {
     return (
       <View style={styles.musicContainer}>
@@ -348,6 +395,23 @@ useEffect(() => {
           end={{x: 1, y: 0.5}}
           style={[styles.titleGradient, { right: 0 }]}
         />
+      </View>
+      <View style={styles.progressContainer}>
+        <Animated.View 
+          style={[
+            styles.progressBar,
+            {
+              width: progressAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
+        />
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: screenWidth * 0.9 }}>
+        <Text style={styles.timeText}>{formatTime(position)}</Text>
+        <Text style={styles.timeText}>{formatTime(duration)}</Text>
       </View>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
