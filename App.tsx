@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react';
-import { View, SafeAreaView, StyleSheet, Text } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Text, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
 
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
+
 const setupPlayer = async () => {
   try {
-    await TrackPlayer.setupPlayer();
+    await TrackPlayer.setupPlayer({
+      autoHandleInterruptions: true,
+    });
     await TrackPlayer.updateOptions({
       android: {
         appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
@@ -22,7 +26,25 @@ const setupPlayer = async () => {
         Capability.Play,
         Capability.Pause,
       ],
+      notificationCapabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+      ],
     });
+
+    // Set up audio session for iOS
+    if (Platform.OS === 'ios') {
+      await Audio.setAudioModeAsync({
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+        allowsRecordingIOS: false
+      });
+    }
   } catch (e) {
     console.log('Error setting up player:', e);
   }

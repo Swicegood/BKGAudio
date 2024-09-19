@@ -17,16 +17,22 @@ import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiW
 import { debounce } from 'lodash';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { customLog, customError } from './customLogger';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const BACKGROUND_FETCH_TASK = 'background-fetch';
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-  const now = Date.now();
-  console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
-  // Be sure to return the successful result type!
-  return BackgroundFetch.BackgroundFetchResult.NewData;
+  try {
+    customLog('Background fetch started');
+    // Your background fetch logic here
+    customLog('Background fetch completed');
+    return BackgroundFetch.BackgroundFetchResult.NewData;
+  } catch (error) {
+    customError('Background fetch failed', error);
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
 });
 
 
@@ -35,7 +41,7 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [sound, setSound] = useState(null);
   const [url, setUrl] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);  
+  const [isLoading, setIsLoading] = useState(true);
   const [songTitle, setSongTitle] = useState(null);
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const isLoadingNewFile = useRef(false);
@@ -84,23 +90,23 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
       // Do something with the error, e.g., show an error message
     }
   };
-  
+
 
   const loadFile = async (fileUrl) => {
     if (playState === 'loading' || isSoundLoading) return;
-  
+
     setPlayState('loading');
     setIsSoundLoading(true);
-  
+
     if (sound) {
       await sound.unloadAsync();
     }
-  
+
     const songTitle = fileUrl.split('/').pop().replace(/\.mp3$/, '');
     setSongTitle(songTitle);
     setUrl(fileUrl); // Set the url to the new fileUrl
   };
-  
+
   const resetAnimation = () => {
     scrollAnim.setValue(0);
   };
@@ -108,7 +114,7 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
   const debouncedLoadPreviousFile = useRef(debounce(async () => {
     if (isLoadingNewFile.current) return;
     isLoadingNewFile.current = true;
-   
+
     const previousFile = await getPreviousFile();
     if (previousFile !== 0) {
       resetAnimation();
@@ -117,8 +123,8 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
 
     isLoadingNewFile.current = false;
   }, 1000));
-  
- 
+
+
   const debouncedLoadNextFile = useRef(debounce(async () => {
     if (isLoadingNewFile.current) return;
     isLoadingNewFile.current = true;
@@ -225,198 +231,254 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
 
 
 
-// Initial song loading
-useEffect(() => {
-  const loadLastSong = async () => {
-    let songUrl = null;
-    let lastPosition = 0;
+  // Initial song loading
+  useEffect(() => {
+    const loadLastSong = async () => {
+      let songUrl = null;
+      let lastPosition = 0;
 
-    try {
-      const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
-      const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
-      console.log('lastsong, lastsongposition :  ', lastSongUrl, lastSongPosition)
-
-      if (lastSongUrl) {
-        songUrl = lastSongUrl;
-        const songTitle = songUrl.split('/').pop().replace(/\.mp3$/, '');
-        setSongTitle(songTitle);
-      }
-
-      if (lastSongPosition) {
-        lastPosition = Number(lastSongPosition);
-      }
-    } catch (error) {
-      console.error('Failed to load the last song and position from AsyncStorage:', error);
-    }
-
-    if (songUrl) {
-      setUrl(songUrl);
-    } else {
-      loadRandomFile();
-    }
-  };
-
-  loadLastSong();
-}, []);
-
-
-const setupAudioMode = async () => {
-  try {
-    await Audio.setAudioModeAsync({
-      staysActiveInBackground: true,
-      interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-      playThroughEarpieceAndroid: false,
-    });
-  } catch (error) {
-    console.log('Error setting audio mode:', error);
-  }
-};
-
-useEffect(() => {
-  setupAudioMode();
-  
-  const subscription = AppState.addEventListener('change', nextAppState => {
-    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-      console.log('App has come to the foreground!');
-      // Optionally refresh the player state here
-    }
-
-    appState.current = nextAppState;
-    setAppStateVisible(appState.current);
-    console.log('AppState', appState.current);
-  });
-
-  return () => {
-    subscription.remove();
-  };
-}, []);
-
-useEffect(() => {
-  registerBackgroundFetchAsync();
-  
-  return () => {
-    unregisterBackgroundFetchAsync();
-  };
-}, []);
-
-const registerBackgroundFetchAsync = async () => {
-  try {
-    await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: 60 * 15, // 15 minutes
-      stopOnTerminate: false,
-      startOnBoot: true,
-    });
-    console.log("Task registered");
-  } catch (err) {
-    console.log("Task Register failed:", err);
-  }
-};
-
-const unregisterBackgroundFetchAsync = async () => {
-  try {
-    await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-  } catch (err) {
-    console.log("Task Unregister failed:", err);
-  }
-};
-
-// Modify the existing useEffect for sound playback
-useEffect(() => {
-  if (sound) {
-    sound.setOnPlaybackStatusUpdate(async (status) => {
-      if (status.didJustFinish) {
-        const nextFile = await getNextFile();
-        await loadFile(nextFile);
-      }
-    });
-  }
-}, [sound]);
-
-// Song changing
-useEffect(() => {
-  if (!url) {
-    return;
-  }
-
-  const loadSound = async () => {
-
-    setIsSoundLoading(true);
-  
-    let songUrl = url;
-    let lastPosition = 0;
-
-      // Try to get the last song and position from AsyncStorage
-    try {
-      if (isFirstLoad) {
+      try {
+        const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
         const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+        console.log('lastsong, lastsongposition :  ', lastSongUrl, lastSongPosition)
+
+        if (lastSongUrl) {
+          songUrl = lastSongUrl;
+          const songTitle = songUrl.split('/').pop().replace(/\.mp3$/, '');
+          setSongTitle(songTitle);
+        }
+
         if (lastSongPosition) {
           lastPosition = Number(lastSongPosition);
-        } else {
-          lastPosition = 0;
         }
-        setIsFirstLoad(false);
+      } catch (error) {
+        console.error('Failed to load the last song and position from AsyncStorage:', error);
       }
-  
-      if (sound) {
-        await sound.unloadAsync();
+
+      if (songUrl) {
+        setUrl(songUrl);
+      } else {
+        loadRandomFile();
       }
-  
+    };
+
+    loadLastSong();
+  }, []);
+
+
+  useEffect(() => {
+    const subscription = Audio.addInterruptionListener((interruption) => {
+      if (interruption.type === 'begin') {
+        // Audio interrupted, pause playback
+        if (sound) {
+          sound.pauseAsync();
+        }
+      } else if (interruption.type === 'end') {
+        // Interruption ended, resume playback if it was playing before
+        if (sound && isPlaying) {
+          sound.playAsync();
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [sound, isPlaying]);
+
+
+  useEffect(() => {
+    const activateAudioSession = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          staysActiveInBackground: true,
+          interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (error) {
+        console.error('Failed to activate audio session', error);
+      }
+    };
+
+    activateAudioSession();
+  }, []);
+
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === 'active' && sound && isPlaying) {
+        // App has come to the foreground, ensure playback is still going
+        sound.playAsync();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [sound, isPlaying]);
+
+  const setupAudioMode = async () => {
+    try {
       await Audio.setAudioModeAsync({
         staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-        allowsRecordingIOS: false,
-        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
         playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
       });
-  
-      const { sound: newSound, status } = await Audio.Sound.createAsync(
-        { uri: songUrl },
-        { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
-      );
-  
-      setSound(newSound);
-      setIsPlaying(true);
-      setPlayState('playing');
-      setIsLoading(false);
-  
-      newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
-        if (playbackStatus.didJustFinish) {
-          setPlayNext(true);
-        }
-  
-        try {
-          await AsyncStorage.setItem('lastSongUrl', songUrl);
-          await AsyncStorage.setItem('lastSongPosition', playbackStatus.positionMillis.toString());
-        } catch (error) {
-          console.error('Failed to save the current song and position to AsyncStorage:', error);
-        }
-      });
-  
-      // Move these calls inside the try block, after all async operations
-      setIsSoundLoading(false);
-      onSongLoaded(true);
     } catch (error) {
-      console.error('Error loading sound:', error);
-      setIsSoundLoading(false);
-      // Consider setting some error state here
+      console.log('Error setting audio mode:', error);
     }
   };
-  
-  loadSound();
 
-}, [url, onSongLoaded]);
+  useEffect(() => {
+    setupAudioMode();
 
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        console.log('App has come to the foreground!');
+        // Optionally refresh the player state here
+      }
 
-useEffect(() => {
-  if (playNext) {
-    debouncedLoadNextFile.current();
-    setPlayNext(false);
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+      console.log('AppState', appState.current);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    registerBackgroundFetch();
+
+    return () => {
+      unregisterBackgroundFetchAsync();
+    };
+  }, []);
+
+  async function registerBackgroundFetch() {
+    try {
+      await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+        minimumInterval: 60 * 15, // 15 minutes
+        stopOnTerminate: false,
+        startOnBoot: true,
+      });
+      customLog('Background fetch registered');
+    } catch (err) {
+      customError('Background fetch registration failed', err);
+    }
   }
-}, [playNext]);
+
+  const unregisterBackgroundFetchAsync = async () => {
+    try {
+      await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+    } catch (err) {
+      console.log("Task Unregister failed:", err);
+    }
+  };
+
+  // Modify the existing useEffect for sound playback
+  useEffect(() => {
+    if (sound) {
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.didJustFinish) {
+          const nextFile = await getNextFile();
+          await loadFile(nextFile);
+        }
+      });
+    }
+  }, [sound]);
+
+  // Song changing
+  useEffect(() => {
+    if (!url) {
+      return;
+    }
+
+    const loadSound = async () => {
+
+      setIsSoundLoading(true);
+
+      let songUrl = url;
+      let lastPosition = 0;
+
+      // Try to get the last song and position from AsyncStorage
+      try {
+        if (isFirstLoad) {
+          const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+          if (lastSongPosition) {
+            lastPosition = Number(lastSongPosition);
+          } else {
+            lastPosition = 0;
+          }
+          setIsFirstLoad(false);
+        }
+
+        if (sound) {
+          await sound.unloadAsync();
+        }
+
+        await Audio.setAudioModeAsync({
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+          allowsRecordingIOS: false,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          playsInSilentModeIOS: true,
+        });
+
+        const { sound: newSound, status } = await Audio.Sound.createAsync(
+          { uri: songUrl },
+          { shouldPlay: true, staysActiveInBackground: true, positionMillis: lastPosition }
+        );
+
+        setSound(newSound);
+        setIsPlaying(true);
+        setPlayState('playing');
+        setIsLoading(false);
+
+        newSound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
+          if (playbackStatus.didJustFinish) {
+            setPlayNext(true);
+          }
+
+          try {
+            await AsyncStorage.setItem('lastSongUrl', songUrl);
+            await AsyncStorage.setItem('lastSongPosition', playbackStatus.positionMillis.toString());
+          } catch (error) {
+            console.error('Failed to save the current song and position to AsyncStorage:', error);
+          }
+        });
+
+        // Move these calls inside the try block, after all async operations
+        setIsSoundLoading(false);
+        onSongLoaded(true);
+      } catch (error) {
+        console.error('Error loading sound:', error);
+        setIsSoundLoading(false);
+        // Consider setting some error state here
+      }
+    };
+
+    loadSound();
+
+  }, [url, onSongLoaded]);
+
+
+  useEffect(() => {
+    if (playNext) {
+      debouncedLoadNextFile.current();
+      setPlayNext(false);
+    }
+  }, [playNext]);
 
   const togglePlayback = async () => {
     if (isPlaying) {
@@ -466,7 +528,7 @@ useEffect(() => {
       </View>
     );
   }
-  
+
   return (
     <View style={styles.musicContainer}>
       <View style={styles.songTitleContainer}>
@@ -477,19 +539,19 @@ useEffect(() => {
         </Animated.View>
         <LinearGradient
           colors={['rgba(237, 201, 146, 1)', 'rgba(237, 201, 146, 0)']}
-          start={{x: 0, y: 0.5}}
-          end={{x: 1, y: 0.5}}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
           style={[styles.titleGradient, { left: 0 }]}
         />
         <LinearGradient
           colors={['rgba(237, 201, 146, 0)', 'rgba(237, 201, 146, 1)']}
-          start={{x: 0, y: 0.5}}
-          end={{x: 1, y: 0.5}}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
           style={[styles.titleGradient, { right: 0 }]}
         />
       </View>
       <View style={styles.progressContainer}>
-        <Animated.View 
+        <Animated.View
           style={[
             styles.progressBar,
             {

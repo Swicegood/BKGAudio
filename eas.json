@@ -8,6 +8,13 @@
       "developmentClient": true,
       "distribution": "internal"
     },
+    "production-debug": {
+      "distribution": "internal",
+      "channel": "production-debug",
+      "env": {
+        "APP_VARIANT": "debug"
+      }
+    },
     "preview": {
       "distribution": "internal"
     },
