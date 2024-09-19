@@ -1,21 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   Animated,
   Dimensions,
+  Text,
+  AppState,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio, InterruptionModeIOS } from "expo-av";
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+const BACKGROUND_FETCH_TASK = 'background-fetch';
+
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = Date.now();
+  console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
+  // Be sure to return the successful result type!
+  return BackgroundFetch.BackgroundFetchResult.NewData;
+});
+
 
 const BasicMusicPlayer = ({ onSongLoaded }) => {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -32,6 +45,9 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
 
 
   const seekBackward = async () => {
@@ -242,6 +258,82 @@ useEffect(() => {
 
   loadLastSong();
 }, []);
+
+
+const setupAudioMode = async () => {
+  try {
+    await Audio.setAudioModeAsync({
+      staysActiveInBackground: true,
+      interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+      playThroughEarpieceAndroid: false,
+    });
+  } catch (error) {
+    console.log('Error setting audio mode:', error);
+  }
+};
+
+useEffect(() => {
+  setupAudioMode();
+  
+  const subscription = AppState.addEventListener('change', nextAppState => {
+    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground!');
+      // Optionally refresh the player state here
+    }
+
+    appState.current = nextAppState;
+    setAppStateVisible(appState.current);
+    console.log('AppState', appState.current);
+  });
+
+  return () => {
+    subscription.remove();
+  };
+}, []);
+
+useEffect(() => {
+  registerBackgroundFetchAsync();
+  
+  return () => {
+    unregisterBackgroundFetchAsync();
+  };
+}, []);
+
+const registerBackgroundFetchAsync = async () => {
+  try {
+    await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+      minimumInterval: 60 * 15, // 15 minutes
+      stopOnTerminate: false,
+      startOnBoot: true,
+    });
+    console.log("Task registered");
+  } catch (err) {
+    console.log("Task Register failed:", err);
+  }
+};
+
+const unregisterBackgroundFetchAsync = async () => {
+  try {
+    await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+  } catch (err) {
+    console.log("Task Unregister failed:", err);
+  }
+};
+
+// Modify the existing useEffect for sound playback
+useEffect(() => {
+  if (sound) {
+    sound.setOnPlaybackStatusUpdate(async (status) => {
+      if (status.didJustFinish) {
+        const nextFile = await getNextFile();
+        await loadFile(nextFile);
+      }
+    });
+  }
+}, [sound]);
 
 // Song changing
 useEffect(() => {

@@ -1,16 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, SafeAreaView, StyleSheet, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
 
+const setupPlayer = async () => {
+  try {
+    await TrackPlayer.setupPlayer();
+    await TrackPlayer.updateOptions({
+      android: {
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+      },
+      capabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+      ],
+      compactCapabilities: [
+        Capability.Play,
+        Capability.Pause,
+      ],
+    });
+  } catch (e) {
+    console.log('Error setting up player:', e);
+  }
+};
 
-
-const App = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isSongLoaded, setIsSongLoaded] = useState(false);
+const App: React.FC = () => {
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [isSongLoaded, setIsSongLoaded] = React.useState(false);
 
   useEffect(() => {
+    setupPlayer();
+
     const timer = setTimeout(() => {
       setIsVisible(false);
     }, 3000);
@@ -81,7 +105,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#C68446',
     width: '100%',
     height: 40,
-    textAlign: 'center', // Add this to horizontally center the text
+    textAlign: 'center',
   },
   text: {
     fontSize: 24,
