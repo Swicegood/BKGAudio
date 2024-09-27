@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, SafeAreaView, StyleSheet, Text, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
-import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
+import TrackPlayer from 'react-native-track-player';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
-import { customLog, customError } from './customLogger';
+
+
 
 const setupPlayer = async () => {
   try {
@@ -47,8 +47,39 @@ const setupPlayer = async () => {
 };
 
 const App: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isSongLoaded, setIsSongLoaded] = useState(false);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [isSongLoaded, setIsSongLoaded] = React.useState(false);
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    setupPlayer();
+
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+    }, 3000);
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      clearTimeout(timer);
+      subscription.remove();
+    };
+  }, []);
+
+  const handleAppStateChange = async (nextAppState: string) => {
+    if (appState.current.match(/active/) && nextAppState === 'background') {
+      // App is moving to the background
+      await TrackPlayer.updateOptions({
+        stopWithApp: false,
+      });
+    } else if (appState.current === 'background' && nextAppState === 'active') {
+      // App is coming to the foreground
+      await TrackPlayer.updateOptions({
+        stopWithApp: true,
+      });
+    }
+    appState.current = nextAppState;
+  };
 
   useEffect(() => {
     const initializeApp = async () => {

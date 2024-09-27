@@ -16,19 +16,45 @@ const useAudioPlayer = (onSongLoaded) => {
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
+  const intervalRef = useRef(null);
+  const lastPlayTime = useRef(0);
 
   useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState], async (event) => {
     if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
       const track = await TrackPlayer.getTrack(event.nextTrack);
       if (track) {
         setSongTitle(track.title);
-        setDuration(track.duration);
+        setDuration(track.duration * 1000); // Convert to milliseconds
+        setPosition(0);
+        lastPlayTime.current = Date.now();
         onSongLoaded(true);
       }
     } else if (event.type === Event.PlaybackState) {
       setIsPlaying(event.state === State.Playing);
+      if (event.state === State.Playing) {
+        lastPlayTime.current = Date.now() - position;
+        startTimer();
+      } else {
+        stopTimer();
+      }
     }
   });
+
+  const startTimer = () => {
+    stopTimer();
+    intervalRef.current = setInterval(() => {
+      setPosition((prevPosition) => {
+        const newPosition = Date.now() - lastPlayTime.current;
+        return newPosition > duration ? duration : newPosition;
+      });
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
 
   const loadRandomFile = async () => {
     try {
@@ -62,6 +88,8 @@ const useAudioPlayer = (onSongLoaded) => {
         title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
       });
       setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
+      setPosition(0);
+      lastPlayTime.current = Date.now();
       await TrackPlayer.play();
     } catch (error) {
       customError('Error in loadFile:', error);
@@ -87,21 +115,57 @@ const useAudioPlayer = (onSongLoaded) => {
     const currentState = await TrackPlayer.getState();
     if (currentState === State.Playing) {
       await TrackPlayer.pause();
+      stopTimer();
     } else {
+      lastPlayTime.current = Date.now() - position;
       await TrackPlayer.play();
+      startTimer();
     }
   };
 
   const seekBackward = async () => {
-    const position = await TrackPlayer.getPosition();
-    await TrackPlayer.seekTo(Math.max(position - 15, 0));
+    const newPosition = Math.max(position - 15000, 0);
+    setPosition(newPosition);
+    lastPlayTime.current = Date.now() - newPosition;
+    await TrackPlayer.seekTo(newPosition / 1000);
   };
 
   const seekForward = async () => {
-    const position = await TrackPlayer.getPosition();
-    const duration = await TrackPlayer.getDuration();
-    await TrackPlayer.seekTo(Math.min(position + 30, duration));
+    const newPosition = Math.min(position + 30000, duration);
+    setPosition(newPosition);
+    lastPlayTime.current = Date.now() - newPosition;
+    await TrackPlayer.seekTo(newPosition / 1000);
   };
+
+  const saveCurrentState = async () => {
+    try {
+      await AsyncStorage.setItem('lastSongPosition', position.toString());
+      const currentTrack = await TrackPlayer.getCurrentTrack();
+      if (currentTrack) {
+        const trackObject = await TrackPlayer.getTrack(currentTrack);
+        await AsyncStorage.setItem('lastSongUrl', trackObject.url);
+      }
+      customLog('Saved current state');
+    } catch (error) {
+      customError('Error saving current state:', error);
+    }
+  };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/active/) && nextAppState === 'background') {
+        // App is moving to the background, save state
+        saveCurrentState();
+      }
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
+
+    return () => {
+      subscription.remove();
+      saveCurrentState(); // Save state when component unmounts
+    };
+  }, []);
 
   useEffect(() => {
     const loadLastSong = async () => {
@@ -112,7 +176,10 @@ const useAudioPlayer = (onSongLoaded) => {
         if (lastSongUrl) {
           await loadFile(lastSongUrl);
           if (lastSongPosition) {
-            await TrackPlayer.seekTo(Number(lastSongPosition));
+            const savedPosition = Number(lastSongPosition);
+            setPosition(savedPosition);
+            lastPlayTime.current = Date.now() - savedPosition;
+            await TrackPlayer.seekTo(savedPosition / 1000);
           }
         } else {
           await loadRandomFile();
@@ -125,6 +192,10 @@ const useAudioPlayer = (onSongLoaded) => {
     };
 
     loadLastSong();
+
+    return () => {
+      stopTimer();
+    };
   }, []);
 
   useEffect(() => {
@@ -143,13 +214,8 @@ const useAudioPlayer = (onSongLoaded) => {
   }, []);
 
   useEffect(() => {
-    const updateProgress = setInterval(async () => {
+    const saveProgress = async () => {
       try {
-        const position = await TrackPlayer.getPosition();
-        const duration = await TrackPlayer.getDuration();
-        setPosition(position);
-        setDuration(duration);
-
         await AsyncStorage.setItem('lastSongPosition', position.toString());
         const currentTrack = await TrackPlayer.getCurrentTrack();
         if (currentTrack) {
@@ -157,12 +223,15 @@ const useAudioPlayer = (onSongLoaded) => {
           await AsyncStorage.setItem('lastSongUrl', trackObject.url);
         }
       } catch (error) {
-        customError('Error updating progress:', error);
+        customError('Error saving progress:', error);
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(updateProgress);
-  }, []);
+    // Save progress every 5 seconds
+    const saveInterval = setInterval(saveProgress, 5000);
+
+    return () => clearInterval(saveInterval);
+  }, [position]);
 
   return {
     isLoading,
@@ -175,6 +244,7 @@ const useAudioPlayer = (onSongLoaded) => {
     seekForward,
     loadPreviousFile: debouncedLoadPreviousFile,
     loadNextFile: debouncedLoadNextFile,
+    saveCurrentState
   };
 };
 
