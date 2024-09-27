@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, SafeAreaView, StyleSheet, Text, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
-
-import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
+import { customLog, customError } from './customLogger';
 
 const setupPlayer = async () => {
   try {
-    await TrackPlayer.setupPlayer({
-      autoHandleInterruptions: true,
-    });
+    customLog('Setting up TrackPlayer');
+    await TrackPlayer.setupPlayer();
     await TrackPlayer.updateOptions({
       android: {
         appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
@@ -26,36 +25,39 @@ const setupPlayer = async () => {
         Capability.Play,
         Capability.Pause,
       ],
-      notificationCapabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-      ],
     });
+    customLog('TrackPlayer setup complete');
 
-    // Set up audio session for iOS
-    if (Platform.OS === 'ios') {
-      await Audio.setAudioModeAsync({
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-        allowsRecordingIOS: false
-      });
-    }
   } catch (e) {
-    console.log('Error setting up player:', e);
+    customError('Error setting up TrackPlayer:', e);
   }
 };
 
 const App: React.FC = () => {
-  const [isVisible, setIsVisible] = React.useState(true);
-  const [isSongLoaded, setIsSongLoaded] = React.useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isSongLoaded, setIsSongLoaded] = useState(false);
 
   useEffect(() => {
-    setupPlayer();
+    const initializeApp = async () => {
+      try {
+        customLog('Initializing app');
+        await setupPlayer();
+        
+        if (Platform.OS === 'ios') {
+          await Audio.setAudioModeAsync({
+            staysActiveInBackground: true,
+            interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+            playsInSilentModeIOS: true,
+          });
+        }
+        
+        customLog('App initialization complete');
+      } catch (error) {
+        customError('Error during app initialization:', error);
+      }
+    };
+
+    initializeApp();
 
     const timer = setTimeout(() => {
       setIsVisible(false);
@@ -91,6 +93,7 @@ const App: React.FC = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

@@ -60,8 +60,6 @@ async function getPlayedFiles() {
   return rawData ? JSON.parse(rawData) : [];
 }
 
-// ... Other code ...
-
 async function setPlayedFile(file, index) {
   const playedFiles = await getPlayedFiles();
 
