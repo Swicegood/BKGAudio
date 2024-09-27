@@ -1,67 +1,73 @@
 import { useState, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Audio } from 'expo-av';
+import TrackPlayer, { State, Event, useTrackPlayerEvents } from 'react-native-track-player';
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
 
 const useAudioPlayer = (onSongLoaded) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [sound, setSound] = useState(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [url, setUrl] = useState(null);
   const [songTitle, setSongTitle] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
   const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  const isLoadingNewFile = useRef(false);
+
+  useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState], async (event) => {
+    if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
+      const track = await TrackPlayer.getTrack(event.nextTrack);
+      if (track) {
+        setSongTitle(track.title);
+        setDuration(track.duration);
+        onSongLoaded(true);
+      }
+    } else if (event.type === Event.PlaybackState) {
+      setIsPlaying(event.state === State.Playing);
+    }
+  });
 
   const loadRandomFile = async () => {
     try {
       const randomFile = await getRandomFile();
-      setUrl(randomFile);
-      const songTitle = randomFile.split('/').pop().replace(/\.mp3$/, '');
-      setSongTitle(songTitle);
-      setIsLoading(false);
+      if (randomFile) {
+        await TrackPlayer.reset();
+        await TrackPlayer.add({
+          id: '1',
+          url: randomFile,
+          title: randomFile.split('/').pop().replace(/\.mp3$/, ''),
+        });
+        setSongTitle(randomFile.split('/').pop().replace(/\.mp3$/, ''));
+        setIsLoading(false);
+        await TrackPlayer.play();
+      }
     } catch (error) {
       customError('Error in loadRandomFile:', error);
     }
   };
 
   const loadFile = async (fileUrl) => {
+    if (isLoadingNewFile.current) return;
+    isLoadingNewFile.current = true;
     setIsLoading(true);
-    if (sound) {
-      await sound.unloadAsync();
-    }
-    const songTitle = fileUrl.split('/').pop().replace(/\.mp3$/, '');
-    setSongTitle(songTitle);
-    setUrl(fileUrl);
-  };
 
-  const togglePlayback = async () => {
-    if (sound) {
-      if (isPlaying) {
-        await sound.pauseAsync();
-      } else {
-        await sound.playAsync();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const seekBackward = async () => {
-    if (sound) {
-      const status = await sound.getStatusAsync();
-      const newPosition = Math.max(status.positionMillis - 15000, 0);
-      await sound.setPositionAsync(newPosition);
-    }
-  };
-
-  const seekForward = async () => {
-    if (sound) {
-      const status = await sound.getStatusAsync();
-      const newPosition = Math.min(status.positionMillis + 30000, status.durationMillis);
-      await sound.setPositionAsync(newPosition);
+    try {
+      await TrackPlayer.reset();
+      await TrackPlayer.add({
+        id: '1',
+        url: fileUrl,
+        title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
+      });
+      setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
+      await TrackPlayer.play();
+    } catch (error) {
+      customError('Error in loadFile:', error);
+    } finally {
+      setIsLoading(false);
+      isLoadingNewFile.current = false;
     }
   };
 
@@ -77,51 +83,89 @@ const useAudioPlayer = (onSongLoaded) => {
     await loadFile(nextFile);
   }, 1000)).current;
 
+  const togglePlayback = async () => {
+    const currentState = await TrackPlayer.getState();
+    if (currentState === State.Playing) {
+      await TrackPlayer.pause();
+    } else {
+      await TrackPlayer.play();
+    }
+  };
+
+  const seekBackward = async () => {
+    const position = await TrackPlayer.getPosition();
+    await TrackPlayer.seekTo(Math.max(position - 15, 0));
+  };
+
+  const seekForward = async () => {
+    const position = await TrackPlayer.getPosition();
+    const duration = await TrackPlayer.getDuration();
+    await TrackPlayer.seekTo(Math.min(position + 30, duration));
+  };
+
   useEffect(() => {
-    loadRandomFile();
+    const loadLastSong = async () => {
+      try {
+        const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
+        const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+
+        if (lastSongUrl) {
+          await loadFile(lastSongUrl);
+          if (lastSongPosition) {
+            await TrackPlayer.seekTo(Number(lastSongPosition));
+          }
+        } else {
+          await loadRandomFile();
+        }
+        setIsFirstLoad(false);
+      } catch (error) {
+        customError('Failed to load the last song and position:', error);
+        await loadRandomFile();
+      }
+    };
+
+    loadLastSong();
   }, []);
 
   useEffect(() => {
-    if (!url) return;
-
-    const loadSound = async () => {
-      try {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: url },
-          { shouldPlay: true }
-        );
-        setSound(newSound);
-        setIsPlaying(true);
-        setIsLoading(false);
-        onSongLoaded(true);
-
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setDuration(status.durationMillis);
-            setPosition(status.positionMillis);
-          }
-          if (status.didJustFinish) {
-            debouncedLoadNextFile();
-          }
-        });
-      } catch (error) {
-        customError('Error loading sound:', error);
-        setIsLoading(false);
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        TrackPlayer.play();
       }
-    };
 
-    loadSound();
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
 
     return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
+      subscription.remove();
     };
-  }, [url, onSongLoaded]);
+  }, []);
+
+  useEffect(() => {
+    const updateProgress = setInterval(async () => {
+      try {
+        const position = await TrackPlayer.getPosition();
+        const duration = await TrackPlayer.getDuration();
+        setPosition(position);
+        setDuration(duration);
+
+        await AsyncStorage.setItem('lastSongPosition', position.toString());
+        const currentTrack = await TrackPlayer.getCurrentTrack();
+        if (currentTrack) {
+          const trackObject = await TrackPlayer.getTrack(currentTrack);
+          await AsyncStorage.setItem('lastSongUrl', trackObject.url);
+        }
+      } catch (error) {
+        customError('Error updating progress:', error);
+      }
+    }, 1000);
+
+    return () => clearInterval(updateProgress);
+  }, []);
 
   return {
     isLoading,
-    sound,
     isPlaying,
     songTitle,
     duration,

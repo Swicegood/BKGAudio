@@ -9,7 +9,6 @@ import styles from './styles';
 const BasicMusicPlayer = ({ onSongLoaded }) => {
   const {
     isLoading,
-    sound,
     isPlaying,
     songTitle,
     duration,
@@ -40,7 +39,7 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
         onSeekForward={seekForward}
         onPrevious={loadPreviousFile}
         onNext={loadNextFile}
-        disabled={!sound}
+        disabled={isLoading}
       />
     </View>
   );

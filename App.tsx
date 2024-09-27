@@ -9,11 +9,21 @@ import { customLog, customError } from './customLogger';
 
 const setupPlayer = async () => {
   try {
-    customLog('Setting up TrackPlayer');
-    await TrackPlayer.setupPlayer();
+    await TrackPlayer.setupPlayer({
+      autoHandleInterruptions: true,
+    });
     await TrackPlayer.updateOptions({
       android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
+        foregroundService: {
+          notificationCapabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+          ],
+          notificationColor: '#C68446',
+        },
       },
       capabilities: [
         Capability.Play,
@@ -25,11 +35,14 @@ const setupPlayer = async () => {
         Capability.Play,
         Capability.Pause,
       ],
+      progressUpdateEventInterval: 2,
     });
-    customLog('TrackPlayer setup complete');
 
+    if (Platform.OS === 'android') {
+      await TrackPlayer.setPlayWhenReady(true);
+    }
   } catch (e) {
-    customError('Error setting up TrackPlayer:', e);
+    console.log('Error setting up player:', e);
   }
 };
 
@@ -48,6 +61,12 @@ const App: React.FC = () => {
             staysActiveInBackground: true,
             interruptionModeIOS: InterruptionModeIOS.DuckOthers,
             playsInSilentModeIOS: true,
+          });
+        } else {
+          await Audio.setAudioModeAsync({
+            staysActiveInBackground: true,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
           });
         }
         
