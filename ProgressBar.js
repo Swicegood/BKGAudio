@@ -3,10 +3,11 @@ import { View, Text, Animated } from 'react-native';
 import styles from './styles';
 
 const ProgressBar = ({ duration, position }) => {
-  const formatTime = (milliseconds) => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+
+  const formatTime = (totalSeconds) => {
+    wholeSeconds = Math.floor(totalSeconds);
+    const minutes = Math.floor(wholeSeconds / 60);
+    const seconds = wholeSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 

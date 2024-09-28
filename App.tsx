@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import TrackPlayer from 'react-native-track-player';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
+import ErrorBoundary from './ErrorBoundary';
 
 
 
@@ -86,7 +87,7 @@ const App: React.FC = () => {
       try {
         customLog('Initializing app');
         await setupPlayer();
-        
+
         if (Platform.OS === 'ios') {
           await Audio.setAudioModeAsync({
             staysActiveInBackground: true,
@@ -100,7 +101,7 @@ const App: React.FC = () => {
             playThroughEarpieceAndroid: false,
           });
         }
-        
+
         customLog('App initialization complete');
       } catch (error) {
         customError('Error during app initialization:', error);
@@ -117,30 +118,32 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {isVisible ? (
-        <SplashScreen />
-      ) : (
-        <>
-          <View style={styles.content}>
-            <View style={styles.headerContainer}>
-              <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
+    <ErrorBoundary>
+      <View style={styles.container}>
+        {isVisible ? (
+          <SplashScreen />
+        ) : (
+          <>
+            <View style={styles.content}>
+              <View style={styles.headerContainer}>
+                <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
+              </View>
+              <View style={styles.textContainer}>
+                {!isSongLoaded && (
+                  <Text style={styles.text}>
+                    Your audio will start playing automatically!
+                  </Text>
+                )}
+              </View>
             </View>
-            <View style={styles.textContainer}>
-              {!isSongLoaded && (
-                <Text style={styles.text}>
-                  Your audio will start playing automatically!
-                </Text>
-              )}
-            </View>
-          </View>
-          <SafeAreaView style={styles.buttonContainer}>
-            <BasicMusicPlayer onSongLoaded={setIsSongLoaded} />
-          </SafeAreaView>
-        </>
-      )}
-      <StatusBar style="auto" />
-    </View>
+            <SafeAreaView style={styles.buttonContainer}>
+              <BasicMusicPlayer onSongLoaded={setIsSongLoaded} />
+            </SafeAreaView>
+          </>
+        )}
+        <StatusBar style="auto" />
+      </View>
+    </ErrorBoundary>
   );
 };
 

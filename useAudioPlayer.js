@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import TrackPlayer, { State, Event, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, { State, Event, useTrackPlayerEvents, useProgress } from 'react-native-track-player';
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
@@ -11,50 +11,25 @@ const useAudioPlayer = (onSongLoaded) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [songTitle, setSongTitle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [duration, setDuration] = useState(0);
-  const [position, setPosition] = useState(0);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
-  const intervalRef = useRef(null);
-  const lastPlayTime = useRef(0);
 
+  const { position, duration } = useProgress();
+
+ 
   useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState], async (event) => {
     if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
       const track = await TrackPlayer.getTrack(event.nextTrack);
       if (track) {
         setSongTitle(track.title);
-        setDuration(track.duration * 1000); // Convert to milliseconds
-        setPosition(0);
-        lastPlayTime.current = Date.now();
         onSongLoaded(true);
       }
     } else if (event.type === Event.PlaybackState) {
       setIsPlaying(event.state === State.Playing);
-      if (event.state === State.Playing) {
-        lastPlayTime.current = Date.now() - position;
-        startTimer();
-      } else {
-        stopTimer();
-      }
     }
   });
 
-  const startTimer = () => {
-    stopTimer();
-    intervalRef.current = setInterval(() => {
-      setPosition((prevPosition) => {
-        const newPosition = Date.now() - lastPlayTime.current;
-        return newPosition > duration ? duration : newPosition;
-      });
-    }, 1000);
-  };
-
-  const stopTimer = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-  };
 
   const loadRandomFile = async () => {
     try {
@@ -88,8 +63,6 @@ const useAudioPlayer = (onSongLoaded) => {
         title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
       });
       setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
-      setPosition(0);
-      lastPlayTime.current = Date.now();
       await TrackPlayer.play();
     } catch (error) {
       customError('Error in loadFile:', error);
@@ -115,26 +88,17 @@ const useAudioPlayer = (onSongLoaded) => {
     const currentState = await TrackPlayer.getState();
     if (currentState === State.Playing) {
       await TrackPlayer.pause();
-      stopTimer();
     } else {
-      lastPlayTime.current = Date.now() - position;
       await TrackPlayer.play();
-      startTimer();
     }
   };
 
   const seekBackward = async () => {
-    const newPosition = Math.max(position - 15000, 0);
-    setPosition(newPosition);
-    lastPlayTime.current = Date.now() - newPosition;
-    await TrackPlayer.seekTo(newPosition / 1000);
+    await TrackPlayer.seekBy(-15);
   };
 
   const seekForward = async () => {
-    const newPosition = Math.min(position + 30000, duration);
-    setPosition(newPosition);
-    lastPlayTime.current = Date.now() - newPosition;
-    await TrackPlayer.seekTo(newPosition / 1000);
+    await TrackPlayer.seekBy(30);
   };
 
   const saveCurrentState = async () => {
@@ -177,9 +141,7 @@ const useAudioPlayer = (onSongLoaded) => {
           await loadFile(lastSongUrl);
           if (lastSongPosition) {
             const savedPosition = Number(lastSongPosition);
-            setPosition(savedPosition);
-            lastPlayTime.current = Date.now() - savedPosition;
-            await TrackPlayer.seekTo(savedPosition / 1000);
+            await TrackPlayer.seekBy(savedPosition);
           }
         } else {
           await loadRandomFile();
@@ -193,9 +155,6 @@ const useAudioPlayer = (onSongLoaded) => {
 
     loadLastSong();
 
-    return () => {
-      stopTimer();
-    };
   }, []);
 
   useEffect(() => {
