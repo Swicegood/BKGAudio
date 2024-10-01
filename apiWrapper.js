@@ -5,8 +5,13 @@ const filesListUrl = "https://atourcity.com/bkgoswami.com/wp/wp-content/uploads/
 
 async function fetchFilesList(filesListUrl) {
   try {
-    const response = await fetch(filesListUrl);
+    proxyUrl = '';
+    const response = await fetch(proxyUrl + filesListUrl);
     const txt = await response.text();
+    if (!txt) {
+      throw new Error('Empty response');
+    }
+    customLog('Fetched files list');
     return txt.split('\n').filter(file => file.trim() !== '' && !file.trim().startsWith('#'));
   } catch (error) {
     customError('Error fetching files list:', error);
@@ -39,6 +44,8 @@ async function loadCachedFiles() {
       }
     }
 
+    customLog('Cached files expired or not found');
+    customLog('Fetching new files list');
     const files = await fetchFilesList(filesListUrl);
     await cacheFiles(files);
     return files;
@@ -118,6 +125,8 @@ async function getRandomFile() {
     const randomIndex = Math.floor(Math.random() * unplayedFiles.length);
     const randomFile = unplayedFiles[randomIndex];
     const currentIndex = playedFiles.length;
+
+    customLog('Random file:', randomFile);
     
     await StorageManager.transaction([
       () => setPlayedFile(randomFile, currentIndex),

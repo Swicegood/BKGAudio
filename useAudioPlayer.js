@@ -33,8 +33,10 @@ const useAudioPlayer = (onSongLoaded) => {
 
   const loadRandomFile = async () => {
     try {
+      customLog('Starting to load random file');
       const randomFile = await getRandomFile();
       if (randomFile) {
+        customLog('Random file obtained:', randomFile);
         await TrackPlayer.reset();
         await TrackPlayer.add({
           id: '1',
@@ -43,10 +45,16 @@ const useAudioPlayer = (onSongLoaded) => {
         });
         setSongTitle(randomFile.split('/').pop().replace(/\.mp3$/, ''));
         setIsLoading(false);
+        customLog('isLoading set to false');
+        onSongLoaded(true);
+        customLog('onSongLoaded(true) called');
         await TrackPlayer.play();
+        customLog('TrackPlayer.play() called');
       }
     } catch (error) {
       customError('Error in loadRandomFile:', error);
+      setIsLoading(false);
+      customLog('isLoading set to false due to error');
     }
   };
 
@@ -134,27 +142,31 @@ const useAudioPlayer = (onSongLoaded) => {
   useEffect(() => {
     const loadLastSong = async () => {
       try {
+        customLog('Starting to load last song');
         const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
         const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
-
+  
         if (lastSongUrl) {
+          customLog('Last song URL found:', lastSongUrl);
           await loadFile(lastSongUrl);
           if (lastSongPosition) {
             const savedPosition = Number(lastSongPosition);
-            await TrackPlayer.seekBy(savedPosition);
+            await TrackPlayer.seekTo(savedPosition);
+            customLog('Seeked to saved position:', savedPosition);
           }
         } else {
+          customLog('No last song URL found, loading random file');
           await loadRandomFile();
         }
         setIsFirstLoad(false);
+        customLog('Initial load completed');
       } catch (error) {
         customError('Failed to load the last song and position:', error);
         await loadRandomFile();
       }
     };
-
+  
     loadLastSong();
-
   }, []);
 
   useEffect(() => {
