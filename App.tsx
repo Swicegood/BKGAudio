@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, AppState } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, SafeAreaView, StyleSheet, Text, AppState, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import TrackPlayer from 'react-native-track-player';
+import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
 import ErrorBoundary from './ErrorBoundary';
-
-
+import { customLog, customError } from './customLogger';
 
 const setupPlayer = async () => {
   try {
@@ -15,17 +15,14 @@ const setupPlayer = async () => {
     });
     await TrackPlayer.updateOptions({
       android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
-        foregroundService: {
-          notificationCapabilities: [
-            Capability.Play,
-            Capability.Pause,
-            Capability.SkipToNext,
-            Capability.SkipToPrevious,
-          ],
-          notificationColor: '#C68446',
-        },
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
       },
+      notificationCapabilities: [
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+      ],
       capabilities: [
         Capability.Play,
         Capability.Pause,
@@ -48,39 +45,9 @@ const setupPlayer = async () => {
 };
 
 const App: React.FC = () => {
-  const [isVisible, setIsVisible] = React.useState(true);
-  const [isSongLoaded, setIsSongLoaded] = React.useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isSongLoaded, setIsSongLoaded] = useState(false);
   const appState = useRef(AppState.currentState);
-
-  useEffect(() => {
-    setupPlayer();
-
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, 3000);
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      clearTimeout(timer);
-      subscription.remove();
-    };
-  }, []);
-
-  const handleAppStateChange = async (nextAppState: string) => {
-    if (appState.current.match(/active/) && nextAppState === 'background') {
-      // App is moving to the background
-      await TrackPlayer.updateOptions({
-        stopWithApp: false,
-      });
-    } else if (appState.current === 'background' && nextAppState === 'active') {
-      // App is coming to the foreground
-      await TrackPlayer.updateOptions({
-        stopWithApp: true,
-      });
-    }
-    appState.current = nextAppState;
-  };
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -99,6 +66,7 @@ const App: React.FC = () => {
             staysActiveInBackground: true,
             shouldDuckAndroid: true,
             playThroughEarpieceAndroid: false,
+            interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
           });
         }
 
@@ -114,11 +82,34 @@ const App: React.FC = () => {
       setIsVisible(false);
     }, 3000);
 
-    return () => clearTimeout(timer);
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      clearTimeout(timer);
+      subscription.remove();
+    };
   }, []);
 
+  const handleAppStateChange = async (nextAppState: string) => {
+    if (appState.current.match(/active/) && nextAppState === 'background') {
+      // App is moving to the background
+      await TrackPlayer.updateOptions( {android: {
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification
+      }});
+    } else if (appState.current === 'background' && nextAppState === 'active') {
+      // App is coming to the foreground
+      await TrackPlayer.updateOptions( {android: {
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
+      }});
+    }
+    appState.current = nextAppState;
+  };
+
+  const handleSongLoaded = (loaded: boolean) => {
+    setIsSongLoaded(loaded);
+  };
+
   return (
-    <ErrorBoundary>
       <View style={styles.container}>
         {isVisible ? (
           <SplashScreen />
@@ -137,16 +128,14 @@ const App: React.FC = () => {
               </View>
             </View>
             <SafeAreaView style={styles.buttonContainer}>
-              <BasicMusicPlayer onSongLoaded={setIsSongLoaded} />
+              <BasicMusicPlayer onSongLoaded={handleSongLoaded} />
             </SafeAreaView>
           </>
         )}
         <StatusBar style="auto" />
       </View>
-    </ErrorBoundary>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

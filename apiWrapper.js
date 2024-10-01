@@ -128,15 +128,19 @@ async function getRandomFile() {
 
     customLog('Random file:', randomFile);
     
-    await StorageManager.transaction([
-      () => setPlayedFile(randomFile, currentIndex),
-      () => setCurrentIndex(currentIndex)
-    ]);
+    try {
+      await setPlayedFile(randomFile, currentIndex);
+      await setCurrentIndex(currentIndex);
+    } catch (error) {
+      customError('Error updating storage:', error);
+      // If storage update fails, still return the random file
+    }
 
     return randomFile;
   } catch (error) {
     customError('Error in getRandomFile:', error);
-    throw error;
+    // If all else fails, return a hardcoded file URL as a fallback
+    // return "https://atourcity.com/bkgoswami.com/wp/wp-content/uploads/fallback-audio.mp3";
   }
 }
 
