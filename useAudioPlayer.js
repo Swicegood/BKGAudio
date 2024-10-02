@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StorageManager from './StorageManager';
 import TrackPlayer, { State, Event, useTrackPlayerEvents, useProgress } from 'react-native-track-player';
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
@@ -111,13 +111,15 @@ const useAudioPlayer = (onSongLoaded) => {
 
   const saveCurrentState = async () => {
     try {
-      await AsyncStorage.setItem('lastSongPosition', position.toString());
-      const currentTrack = await TrackPlayer.getCurrentTrack();
-      if (currentTrack) {
+      const currentProgress = await TrackPlayer.getProgress();
+      await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
+      const currentTrack = await TrackPlayer.getActiveTrackIndex();
+      if (currentTrack !== null && currentTrack !== undefined) {
         const trackObject = await TrackPlayer.getTrack(currentTrack);
-        await AsyncStorage.setItem('lastSongUrl', trackObject.url);
+        await StorageManager.setItem('lastSongUrl', trackObject.url);
+        customLog('Saved current state', trackObject.url );
+        customLog('Saved current position', currentProgress.position );
       }
-      customLog('Saved current state');
     } catch (error) {
       customError('Error saving current state:', error);
     }
@@ -143,8 +145,8 @@ const useAudioPlayer = (onSongLoaded) => {
     const loadLastSong = async () => {
       try {
         customLog('Starting to load last song');
-        const lastSongUrl = await AsyncStorage.getItem('lastSongUrl');
-        const lastSongPosition = await AsyncStorage.getItem('lastSongPosition');
+        const lastSongUrl = await StorageManager.getItem('lastSongUrl');
+        const lastSongPosition = await StorageManager.getItem('lastSongPosition');
   
         if (lastSongUrl) {
           customLog('Last song URL found:', lastSongUrl);
@@ -185,24 +187,34 @@ const useAudioPlayer = (onSongLoaded) => {
   }, []);
 
   useEffect(() => {
+    customLog('Setting up save progress interval');
+    
     const saveProgress = async () => {
+      customLog('saveProgress called');
       try {
-        await AsyncStorage.setItem('lastSongPosition', position.toString());
-        const currentTrack = await TrackPlayer.getCurrentTrack();
-        if (currentTrack) {
+        const currentProgress = await TrackPlayer.getProgress();
+        await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
+        const currentTrack = await TrackPlayer.getActiveTrackIndex();
+        if (currentTrack !== null && currentTrack !== undefined) {
           const trackObject = await TrackPlayer.getTrack(currentTrack);
-          await AsyncStorage.setItem('lastSongUrl', trackObject.url);
+          await StorageManager.setItem('lastSongUrl', trackObject.url);
+          customLog('Saved progress:', { url: trackObject.url, position: currentProgress.position });
         }
       } catch (error) {
         customError('Error saving progress:', error);
       }
     };
-
-    // Save progress every 5 seconds
-    const saveInterval = setInterval(saveProgress, 5000);
-
-    return () => clearInterval(saveInterval);
-  }, [position]);
+  
+    const intervalId = setInterval(saveProgress, 5000);
+  
+    // Initial save
+    saveProgress();
+  
+    return () => {
+      console.log('Clearing save progress interval');
+      clearInterval(intervalId);
+    };
+  }, []); 
 
   return {
     isLoading,

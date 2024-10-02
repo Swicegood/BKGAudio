@@ -46,12 +46,33 @@ module.exports = async function() {
   TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async (event) => {
     customLog('PlaybackQueueEnded event received', event);
     try {
-      if (event.track) {
-        customLog('Last track in queue:', event.track);
+      customLog('Queue ended, fetching next file');
+      const { getNextFile } = require('./apiWrapper');
+      const nextFile = await getNextFile();
+      customLog('Next file to play:', nextFile);
+      await TrackPlayer.reset();
+      await TrackPlayer.add({
+        id: '1',
+        url: nextFile,
+        title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
+      });
+      await TrackPlayer.play();
+      customLog('Started playing next file');
+    } catch (error) {
+      customError('Error in PlaybackQueueEnded event:', error);
+    }
+  });
+
+  TrackPlayer.addEventListener(Event.PlaybackState, async (event) => {
+    customLog('PlaybackState changed:', event.state);
+    if (event.state === TrackPlayer.State.Stopped) {
+      customLog('Playback stopped, checking if queue is empty');
+      const queue = await TrackPlayer.getQueue();
+      if (queue.length === 0) {
+        customLog('Queue is empty, fetching next file');
         const { getNextFile } = require('./apiWrapper');
         const nextFile = await getNextFile();
         customLog('Next file to play:', nextFile);
-        await TrackPlayer.reset();
         await TrackPlayer.add({
           id: '1',
           url: nextFile,
@@ -59,17 +80,8 @@ module.exports = async function() {
         });
         await TrackPlayer.play();
         customLog('Started playing next file');
-      } else {
-        customLog('No track in PlaybackQueueEnded event');
       }
-    } catch (error) {
-      customError('Error in PlaybackQueueEnded event:', error);
     }
-  });
-
-  // Add logging for other events to see which events are being triggered
-  TrackPlayer.addEventListener(Event.PlaybackState, (event) => {
-    customLog('PlaybackState changed:', event.state);
   });
 
   TrackPlayer.addEventListener(Event.PlaybackError, (error) => {
