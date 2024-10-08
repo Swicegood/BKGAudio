@@ -187,10 +187,8 @@ const useAudioPlayer = (onSongLoaded) => {
   }, []);
 
   useEffect(() => {
-    customLog('Setting up save progress interval');
     
     const saveProgress = async () => {
-      customLog('saveProgress called');
       try {
         const currentProgress = await TrackPlayer.getProgress();
         await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
@@ -198,7 +196,6 @@ const useAudioPlayer = (onSongLoaded) => {
         if (currentTrack !== null && currentTrack !== undefined) {
           const trackObject = await TrackPlayer.getTrack(currentTrack);
           await StorageManager.setItem('lastSongUrl', trackObject.url);
-          customLog('Saved progress:', { url: trackObject.url, position: currentProgress.position });
         }
       } catch (error) {
         customError('Error saving progress:', error);
@@ -211,7 +208,6 @@ const useAudioPlayer = (onSongLoaded) => {
     saveProgress();
   
     return () => {
-      console.log('Clearing save progress interval');
       clearInterval(intervalId);
     };
   }, []); 

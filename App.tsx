@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, AppState, Platform } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Text, AppState, Platform, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
 import ErrorBoundary from './ErrorBoundary';
+import DebugScreen from './DebugScreen';
 import { customLog, customError } from './customLogger';
 
 const setupPlayer = async () => {
@@ -48,6 +49,9 @@ const App: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isSongLoaded, setIsSongLoaded] = useState(false);
   const appState = useRef(AppState.currentState);
+  const [showDebugScreen, setShowDebugScreen] = useState(false);
+  const debugTapCount = useRef(0);
+  const lastTapTime = useRef(0);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -93,47 +97,71 @@ const App: React.FC = () => {
   const handleAppStateChange = async (nextAppState: string) => {
     if (appState.current.match(/active/) && nextAppState === 'background') {
       // App is moving to the background
-      await TrackPlayer.updateOptions( {android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification
-      }});
+      await TrackPlayer.updateOptions({
+        android: {
+          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification
+        }
+      });
     } else if (appState.current === 'background' && nextAppState === 'active') {
       // App is coming to the foreground
-      await TrackPlayer.updateOptions( {android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
-      }});
+      await TrackPlayer.updateOptions({
+        android: {
+          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
+        }
+      });
     }
     appState.current = nextAppState;
+  };
+
+  const handleHeaderPress = () => {
+    const now = Date.now();
+    if (now - lastTapTime.current < 500) {
+      debugTapCount.current += 1;
+      if (debugTapCount.current >= 5) {
+        setShowDebugScreen(true);
+        debugTapCount.current = 0;
+      }
+    } else {
+      debugTapCount.current = 1;
+    }
+    lastTapTime.current = now;
   };
 
   const handleSongLoaded = (loaded: boolean) => {
     setIsSongLoaded(loaded);
   };
 
+  if (showDebugScreen) {
+    return <DebugScreen onClose={() => setShowDebugScreen(false)} />;
+  }
+
   return (
-      <View style={styles.container}>
-        {isVisible ? (
-          <SplashScreen />
-        ) : (
-          <>
-            <View style={styles.content}>
+    <View style={styles.container}>
+      {isVisible ? (
+        <SplashScreen />
+      ) : (
+        <>
+          <View style={styles.content}>
+            <TouchableOpacity onPress={handleHeaderPress}>
               <View style={styles.headerContainer}>
                 <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
               </View>
-              <View style={styles.textContainer}>
-                {!isSongLoaded && (
-                  <Text style={styles.text}>
-                    Your audio will start playing automatically!
-                  </Text>
-                )}
-              </View>
+            </TouchableOpacity>
+            <View style={styles.textContainer}>
+              {!isSongLoaded && (
+                <Text style={styles.text}>
+                  Your audio will start playing automatically!
+                </Text>
+              )}
             </View>
-            <SafeAreaView style={styles.buttonContainer}>
-              <BasicMusicPlayer onSongLoaded={handleSongLoaded} />
-            </SafeAreaView>
-          </>
-        )}
-        <StatusBar style="auto" />
-      </View>
+          </View>
+          <SafeAreaView style={styles.buttonContainer}>
+            <BasicMusicPlayer onSongLoaded={handleSongLoaded} />
+          </SafeAreaView>
+        </>
+      )}
+      <StatusBar style="auto" />
+    </View>
   );
 };
 

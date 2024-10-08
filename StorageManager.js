@@ -10,7 +10,6 @@ class StorageManager {
     return this.enqueue(async () => {
       try {
         const value = await AsyncStorage.getItem(key);
-        customLog(`Retrieved item: ${key}`);
         return value;
       } catch (error) {
         customError(`Error retrieving item: ${key}`, error);
@@ -23,7 +22,6 @@ class StorageManager {
     return this.enqueue(async () => {
       try {
         await AsyncStorage.setItem(key, value);
-        customLog(`Set item: ${key}`);
       } catch (error) {
         customError(`Error setting item: ${key}`, error);
         throw error;
