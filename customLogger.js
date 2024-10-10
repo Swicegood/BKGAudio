@@ -4,13 +4,20 @@ import Constants from 'expo-constants';
 const isDebug = Constants.expoConfig.extra.enableVerboseLogging;
 const MAX_LOGS = 100;
 const LOG_KEY = 'DEBUG_LOGS';
+const LOG_QUEUE = [];
+let isSaving = false;
 
-const saveLog = async (type, message) => {
+const processLogQueue = async () => {
+  if (isSaving || LOG_QUEUE.length === 0) return;
+  
+  isSaving = true;
   try {
     const existingLogs = await StorageManager.getItem(LOG_KEY);
     let logs = existingLogs ? JSON.parse(existingLogs) : [];
     
-    logs.unshift({ type, message, timestamp: new Date().toISOString() });
+    while (LOG_QUEUE.length > 0) {
+      logs.unshift(LOG_QUEUE.pop());
+    }
     
     if (logs.length > MAX_LOGS) {
       logs = logs.slice(0, MAX_LOGS);
@@ -18,20 +25,36 @@ const saveLog = async (type, message) => {
 
     await StorageManager.setItem(LOG_KEY, JSON.stringify(logs));
   } catch (error) {
-    console.error('Failed to save log:', error);
+    console.error('Failed to save logs:', error);
+  } finally {
+    isSaving = false;
+    if (LOG_QUEUE.length > 0) {
+      processLogQueue();
+    }
   }
+};
+
+const queueLog = (type, message) => {
+  const logEntry = { 
+    type, 
+    message: typeof message === 'object' ? JSON.stringify(message) : message.toString(),
+    timestamp: new Date().toISOString() 
+  };
+  LOG_QUEUE.push(logEntry);
+  processLogQueue();
 };
 
 export const customLog = (message, ...optionalParams) => {
-  if (isDebug) {
-    console.log(`[DEBUG] ${message}`, ...optionalParams);
-    saveLog('INFO', message);
-  }
+  if (!isDebug) return;
+  const fullMessage = [message, ...optionalParams].join(' ');
+  console.log(`[DEBUG] ${fullMessage}`);
+  queueLog('INFO', fullMessage);
 };
 
 export const customError = (message, ...optionalParams) => {
-  console.error(`[ERROR] ${message}`, ...optionalParams);
-  saveLog('ERROR', message);
+  const fullMessage = [message, ...optionalParams].join(' ');
+  console.error(`[ERROR] ${fullMessage}`);
+  queueLog('ERROR', fullMessage);
 };
 
 export const getLogs = async () => {

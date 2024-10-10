@@ -7,6 +7,7 @@ import SplashScreen from './SplashScreen';
 import BasicMusicPlayer from './BasicMusicPlayer';
 import ErrorBoundary from './ErrorBoundary';
 import DebugScreen from './DebugScreen';
+import { registerBackgroundFetch, unregisterBackgroundFetch } from './backgroundFetch';
 import { customLog, customError } from './customLogger';
 
 const setupPlayer = async () => {
@@ -58,6 +59,7 @@ const App: React.FC = () => {
       try {
         customLog('Initializing app');
         await setupPlayer();
+        await registerBackgroundFetch();
 
         if (Platform.OS === 'ios') {
           await Audio.setAudioModeAsync({
@@ -91,6 +93,7 @@ const App: React.FC = () => {
     return () => {
       clearTimeout(timer);
       subscription.remove();
+      unregisterBackgroundFetch
     };
   }, []);
 

@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
 import { getLogs, clearLogs } from './customLogger';
+import * as Clipboard from 'expo-clipboard';
 
 const DebugScreen = ({ onClose }) => {
   const [logs, setLogs] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const copyLogsToClipboard = () => {
+    const logText = logs.map(log => `${log.timestamp} [${log.type}] ${log.message}`).join('\n');
+    Clipboard.setString(logText);
+  };
 
   const fetchLogs = async () => {
     const fetchedLogs = await getLogs();
@@ -29,7 +35,7 @@ const DebugScreen = ({ onClose }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Debug Logs</Text>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -48,6 +54,9 @@ const DebugScreen = ({ onClose }) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleClearLogs}>
           <Text style={styles.buttonText}>Clear Logs</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={copyLogsToClipboard}>
+          <Text style={styles.buttonText}>Copy Logs</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={onClose}>
           <Text style={styles.buttonText}>Close</Text>
@@ -90,6 +99,7 @@ const styles = StyleSheet.create({
   },
   logMessage: {
     fontSize: 14,
+    flexWrap: 'wrap',  // Allow text to wrap
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -100,7 +110,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#C68446',
     padding: 10,
     borderRadius: 5,
-    width: '45%',
+    width: '30%',
     alignItems: 'center',
   },
   buttonText: {

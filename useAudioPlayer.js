@@ -17,15 +17,25 @@ const useAudioPlayer = (onSongLoaded) => {
 
   const { position, duration } = useProgress();
 
- 
-  useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState], async (event) => {
-    if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
+  let isTrackEnded = false;
+
+  useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState, Event.PlaybackError], async (event) => {
+    if (event.type === Event.PlaybackError) {
+      customError('Playback error:', event.error);
+      // Handle the error, possibly by loading the next track
+      await debouncedLoadNextFile();
+    } else if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
       const track = await TrackPlayer.getTrack(event.nextTrack);
       if (track) {
         setSongTitle(track.title);
         onSongLoaded(true);
+        isTrackEnded = true;
       }
     } else if (event.type === Event.PlaybackState) {
+      if (event.state === State.Stopped && isTrackEnded) {
+        await debouncedLoadNextFile();
+        isTrackEnded = false;
+      }
       setIsPlaying(event.state === State.Playing);
     }
   });
