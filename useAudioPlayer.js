@@ -122,13 +122,15 @@ const useAudioPlayer = (onSongLoaded) => {
   const saveCurrentState = async () => {
     try {
       const currentProgress = await TrackPlayer.getProgress();
-      await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
       const currentTrack = await TrackPlayer.getActiveTrackIndex();
       if (currentTrack !== null && currentTrack !== undefined) {
         const trackObject = await TrackPlayer.getTrack(currentTrack);
         await StorageManager.setItem('lastSongUrl', trackObject.url);
         customLog('Saved current state', trackObject.url );
-        customLog('Saved current position', currentProgress.position );
+        if (currentProgress.position) {
+          await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
+          customLog('Saved current position', currentProgress.position );
+        }
       }
     } catch (error) {
       customError('Error saving current state:', error);
@@ -156,14 +158,16 @@ const useAudioPlayer = (onSongLoaded) => {
       try {
         customLog('Starting to load last song');
         const lastSongUrl = await StorageManager.getItem('lastSongUrl');
+        customLog('Starting to load last song position');
         const lastSongPosition = await StorageManager.getItem('lastSongPosition');
+        customLog('Last song position found: ', lastSongPosition);
   
         if (lastSongUrl) {
           customLog('Last song URL found:', lastSongUrl);
           await loadFile(lastSongUrl);
           if (lastSongPosition) {
             const savedPosition = Number(lastSongPosition);
-            await TrackPlayer.seekTo(savedPosition);
+            await TrackPlayer.seekBy(savedPosition);
             customLog('Seeked to saved position:', savedPosition);
           }
         } else {
@@ -201,11 +205,14 @@ const useAudioPlayer = (onSongLoaded) => {
     const saveProgress = async () => {
       try {
         const currentProgress = await TrackPlayer.getProgress();
-        await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
         const currentTrack = await TrackPlayer.getActiveTrackIndex();
         if (currentTrack !== null && currentTrack !== undefined) {
           const trackObject = await TrackPlayer.getTrack(currentTrack);
           await StorageManager.setItem('lastSongUrl', trackObject.url);
+          if (currentProgress.position) {
+            await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
+            customLog('Saved current position', currentProgress.position);
+          }
         }
       } catch (error) {
         customError('Error saving progress:', error);
