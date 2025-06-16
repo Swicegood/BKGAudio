@@ -35,14 +35,14 @@ const setupPlayer = async () => {
         Capability.Play,
         Capability.Pause,
       ],
-      progressUpdateEventInterval: 2,
+      progressUpdateEventInterval: 1,
     });
 
     if (Platform.OS === 'android') {
       await TrackPlayer.setPlayWhenReady(true);
     }
   } catch (e) {
-    console.log('Error setting up player:', e);
+    customError('Error setting up player:', e);
   }
 };
 
@@ -66,6 +66,7 @@ const App: React.FC = () => {
             staysActiveInBackground: true,
             interruptionModeIOS: InterruptionModeIOS.DuckOthers,
             playsInSilentModeIOS: true,
+            shouldDuckAndroid: false,
           });
         } else {
           await Audio.setAudioModeAsync({
@@ -93,26 +94,23 @@ const App: React.FC = () => {
     return () => {
       clearTimeout(timer);
       subscription.remove();
-      unregisterBackgroundFetch
+      unregisterBackgroundFetch();
     };
   }, []);
 
   const handleAppStateChange = async (nextAppState: string) => {
-    if (appState.current.match(/active/) && nextAppState === 'background') {
-      // App is moving to the background
-      await TrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification
-        }
-      });
-    } else if (appState.current === 'background' && nextAppState === 'active') {
-      // App is coming to the foreground
-      await TrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
-        }
-      });
+    customLog(`App state changed from ${appState.current} to ${nextAppState}`);
+    
+    if (appState.current.match(/background/) && nextAppState === 'active') {
+      customLog('App coming to foreground');
+      try {
+        const state = await TrackPlayer.getState();
+        customLog('Current player state on foreground:', state);
+      } catch (error) {
+        customError('Error checking player state on foreground:', error);
+      }
     }
+    
     appState.current = nextAppState;
   };
 

@@ -168,25 +168,41 @@ async function getNextFile() {
     const currentIndex = await getCurrentIndex();
     const allFiles = await getAllFiles();
 
-    if (currentIndex === allFiles.length - 1) {
-      return getRandomFile();
+    customLog(`Getting next file. Current index: ${currentIndex}, Total files: ${allFiles.length}, Played files: ${playedFiles.length}`);
+
+    // If we've reached the end, get a random file to continue the cycle
+    if (currentIndex >= allFiles.length - 1) {
+      customLog('Reached end of files, getting random file to continue');
+      return await getRandomFile();
     }
 
     const newIndex = currentIndex + 1;
     let nextFile;
 
+    // Check if we already have this file in played files
     if (playedFiles[newIndex]) {
       nextFile = playedFiles[newIndex];
+      customLog('Using existing played file at index:', newIndex);
     } else {
+      // Get from all files and add to played files
       nextFile = allFiles[newIndex];
       await setPlayedFile(nextFile, newIndex);
+      customLog('Added new file to played files at index:', newIndex);
     }
 
     await setCurrentIndex(newIndex);
+    customLog('Next file to play:', nextFile);
     return nextFile;
   } catch (error) {
     customError('Error in getNextFile:', error);
-    throw error;
+    // Fallback to random file if there's an error
+    try {
+      customLog('Falling back to random file due to error');
+      return await getRandomFile();
+    } catch (fallbackError) {
+      customError('Fallback to random file also failed:', fallbackError);
+      throw fallbackError;
+    }
   }
 }
 

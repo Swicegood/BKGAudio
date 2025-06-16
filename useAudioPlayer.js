@@ -3,7 +3,6 @@ import { AppState } from 'react-native';
 import StorageManager from './StorageManager';
 import TrackPlayer, { State, Event, useTrackPlayerEvents, useProgress } from 'react-native-track-player';
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
-import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
 
 const useAudioPlayer = (onSongLoaded) => {
@@ -17,29 +16,14 @@ const useAudioPlayer = (onSongLoaded) => {
 
   const { position, duration } = useProgress();
 
-  let isTrackEnded = false;
-
-  useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState, Event.PlaybackError], async (event) => {
+  // Simplified event handling - let service.js handle queue management
+  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackError], async (event) => {
     if (event.type === Event.PlaybackError) {
       customError('Playback error:', event.error);
-      // Handle the error, possibly by loading the next track
-      await debouncedLoadNextFile();
-    } else if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
-      const track = await TrackPlayer.getTrack(event.nextTrack);
-      if (track) {
-        setSongTitle(track.title);
-        onSongLoaded(true);
-        isTrackEnded = true;
-      }
     } else if (event.type === Event.PlaybackState) {
-      if (event.state === State.Stopped && isTrackEnded) {
-        await debouncedLoadNextFile();
-        isTrackEnded = false;
-      }
       setIsPlaying(event.state === State.Playing);
     }
   });
-
 
   const loadRandomFile = async () => {
     try {
@@ -49,7 +33,7 @@ const useAudioPlayer = (onSongLoaded) => {
         customLog('Random file obtained:', randomFile);
         await TrackPlayer.reset();
         await TrackPlayer.add({
-          id: '1',
+          id: Date.now().toString(), // Use timestamp for unique IDs
           url: randomFile,
           title: randomFile.split('/').pop().replace(/\.mp3$/, ''),
         });
@@ -76,7 +60,7 @@ const useAudioPlayer = (onSongLoaded) => {
     try {
       await TrackPlayer.reset();
       await TrackPlayer.add({
-        id: '1',
+        id: Date.now().toString(),
         url: fileUrl,
         title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
       });
@@ -90,17 +74,28 @@ const useAudioPlayer = (onSongLoaded) => {
     }
   };
 
-  const debouncedLoadPreviousFile = useRef(debounce(async () => {
-    const previousFile = await getPreviousFile();
-    if (previousFile !== 0) {
-      await loadFile(previousFile);
+  // Remove debouncing for immediate response
+  const loadPreviousFile = async () => {
+    try {
+      const previousFile = await getPreviousFile();
+      if (previousFile && previousFile !== 0) {
+        await loadFile(previousFile);
+      }
+    } catch (error) {
+      customError('Error in loadPreviousFile:', error);
     }
-  }, 1000)).current;
+  };
 
-  const debouncedLoadNextFile = useRef(debounce(async () => {
-    const nextFile = await getNextFile();
-    await loadFile(nextFile);
-  }, 1000)).current;
+  const loadNextFile = async () => {
+    try {
+      const nextFile = await getNextFile();
+      if (nextFile) {
+        await loadFile(nextFile);
+      }
+    } catch (error) {
+      customError('Error in loadNextFile:', error);
+    }
+  };
 
   const togglePlayback = async () => {
     const currentState = await TrackPlayer.getState();
@@ -126,9 +121,11 @@ const useAudioPlayer = (onSongLoaded) => {
       const currentTrack = await TrackPlayer.getActiveTrackIndex();
       if (currentTrack !== null && currentTrack !== undefined) {
         const trackObject = await TrackPlayer.getTrack(currentTrack);
-        await StorageManager.setItem('lastSongUrl', trackObject.url);
-        customLog('Saved current state', trackObject.url );
-        customLog('Saved current position', currentProgress.position );
+        if (trackObject) {
+          await StorageManager.setItem('lastSongUrl', trackObject.url);
+          customLog('Saved current state', trackObject.url );
+          customLog('Saved current position', currentProgress.position );
+        }
       }
     } catch (error) {
       customError('Error saving current state:', error);
@@ -181,23 +178,8 @@ const useAudioPlayer = (onSongLoaded) => {
     loadLastSong();
   }, []);
 
+  // Remove duplicate app state listener
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        TrackPlayer.play();
-      }
-
-      appState.current = nextAppState;
-      setAppStateVisible(appState.current);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    
     const saveProgress = async () => {
       try {
         const currentProgress = await TrackPlayer.getProgress();
@@ -205,7 +187,9 @@ const useAudioPlayer = (onSongLoaded) => {
         const currentTrack = await TrackPlayer.getActiveTrackIndex();
         if (currentTrack !== null && currentTrack !== undefined) {
           const trackObject = await TrackPlayer.getTrack(currentTrack);
-          await StorageManager.setItem('lastSongUrl', trackObject.url);
+          if (trackObject) {
+            await StorageManager.setItem('lastSongUrl', trackObject.url);
+          }
         }
       } catch (error) {
         customError('Error saving progress:', error);
@@ -231,8 +215,8 @@ const useAudioPlayer = (onSongLoaded) => {
     togglePlayback,
     seekBackward,
     seekForward,
-    loadPreviousFile: debouncedLoadPreviousFile,
-    loadNextFile: debouncedLoadNextFile,
+    loadPreviousFile,
+    loadNextFile,
     saveCurrentState
   };
 };
