@@ -1,11 +1,24 @@
 import TrackPlayer, { Event, State } from 'react-native-track-player';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { customLog, customError } from './customLogger';
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 
 const requestAudioFocus = async () => {
-  return true;
-};
+    try {
+      await Audio.setAudioModeAsync({
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
+      });
+      return true;
+    } catch (error) {
+      customError('Failed to set audio mode:', error);
+      return false;
+    }
+  };
 
 module.exports = async function () {
   customLog('Service function started');
@@ -48,9 +61,10 @@ module.exports = async function () {
     TrackPlayer.skipToPrevious();
   });
 
-  const playWithRetry = async (retries = 3) => {
+  const playWithRetry = async (retries = 5) => {
     for (let i = 0; i < retries; i++) {
       try {
+        await TrackPlayer.stop();
         await TrackPlayer.play();
         const state = await TrackPlayer.getState();
         customLog(`Attempt ${i + 1}: PlaybackState after play:`, state);
@@ -58,7 +72,7 @@ module.exports = async function () {
           customLog('Successfully started playback');
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second before retry
       } catch (error) {
         customError(`Attempt ${i + 1} failed:`, error);
       }

@@ -5,6 +5,7 @@ import TrackPlayer, { State, Event, useTrackPlayerEvents, useProgress } from 're
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
+import { InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 
 const useAudioPlayer = (onSongLoaded) => {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -14,10 +15,63 @@ const useAudioPlayer = (onSongLoaded) => {
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
-
+  const watchdogIntervalRef = useRef(null);
   const { position, duration } = useProgress();
 
   let isTrackEnded = false;
+
+  const ensureAudioSessionActive = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
+      });
+      console.log('Audio session reactivated');
+    } catch (error) {
+      console.error('Error reactivating audio session:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    const setupAudioAndWatchdog = async () => {
+      await ensureAudioSessionActive();
+      
+      // Start the watchdog
+      watchdogIntervalRef.current = startPlaybackWatchdog();
+    };
+
+    setupAudioAndWatchdog();
+
+    // Clean up function
+    return () => {
+      if (watchdogIntervalRef.current) {
+        clearInterval(watchdogIntervalRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App has come to the foreground
+        console.log('App moved to foreground, restarting watchdog');
+        if (watchdogIntervalRef.current) {
+          clearInterval(watchdogIntervalRef.current);
+        }
+        watchdogIntervalRef.current = startPlaybackWatchdog();
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState, Event.PlaybackError], async (event) => {
     if (event.type === Event.PlaybackError) {
@@ -136,6 +190,17 @@ const useAudioPlayer = (onSongLoaded) => {
       customError('Error saving current state:', error);
     }
   };
+
+  const startPlaybackWatchdog = () => {
+  setInterval(async () => {
+    const playerState = await TrackPlayer.getState();
+    if (playerState === State.Ready) {
+      customLog('Player ready but not playing, attempting to resume');
+      await ensureAudioSessionActive();
+      await TrackPlayer.play();
+    }
+  }, 5000); // Check every 5 seconds
+};
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {

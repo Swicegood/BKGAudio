@@ -8,6 +8,8 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   try {
     customLog('Background fetch started');
     // Your background fetch logic here
+      // No track playing, try to start the next one
+    await TrackPlayer.play();
     customLog('Background fetch completed');
     return BackgroundFetch.BackgroundFetchResult.NewData;
   } catch (error) {
@@ -19,7 +21,7 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
 export const registerBackgroundFetch = async () => {
   try {
     await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: 60 * 15, // 15 minutes
+      minimumInterval: 60, // 1 minute
       stopOnTerminate: false,
       startOnBoot: true,
     });
