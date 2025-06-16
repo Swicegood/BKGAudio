@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, SafeAreaView, StyleSheet, Text, AppState, Platform, TouchableOpacity, AppStateStatus } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
-import { loadFonts } from './font';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import useAudioPlayer from './useAudioPlayer';
 import BasicMusicPlayer from './BasicMusicPlayer';
