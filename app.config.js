@@ -19,7 +19,12 @@ module.exports = ({ config }) => {
       bundleIdentifier: isDebug ? "com.iskcon.bkgaudio.debug" : "com.iskcon.bkgaudio",
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: ["audio", "fetch"],
+        UIBackgroundModes: ["audio", "fetch", "background-processing"],
+        AVAudioSessionCategory: "AVAudioSessionCategoryPlayback",
+        AVAudioSessionCategoryOptions: [
+          "AVAudioSessionCategoryOptionMixWithOthers",
+          "AVAudioSessionCategoryOptionDefaultToSpeaker"
+        ],
       },
       buildNumber: "17",
     },
@@ -30,7 +35,12 @@ module.exports = ({ config }) => {
         backgroundColor: "#ffffff",
       },
       versionCode: 5,
-      permissions: ["FOREGROUND_SERVICE", "WAKE_LOCK"]
+      permissions: [
+        "FOREGROUND_SERVICE", 
+        "WAKE_LOCK",
+        "SYSTEM_ALERT_WINDOW",
+        "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+      ]
     },
     web: {
       favicon: "./assets/favicon.png",

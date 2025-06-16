@@ -1,11 +1,21 @@
 import TrackPlayer, { Event, State } from 'react-native-track-player';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { customLog, customError } from './customLogger';
-import { Audio } from 'expo-av';
 
+// Audio focus management for Android
 const requestAudioFocus = async () => {
-  return true;
+  try {
+    // In a real app, you'd use react-native-audio-focus or similar
+    // For now, we'll assume we have focus
+    return true;
+  } catch (error) {
+    customError('Error requesting audio focus:', error);
+    return false;
+  }
 };
+
+// Track auto-advance to prevent duplicate loading
+let isAutoAdvancing = false;
 
 module.exports = async function () {
   customLog('Service function started');
@@ -23,127 +33,171 @@ module.exports = async function () {
   TrackPlayer.addEventListener(Event.RemoteStop, async () => {
     customLog('RemoteStop event received');
     try {
-      const position = await TrackPlayer.getPosition();
-      const currentTrack = await TrackPlayer.getCurrentTrack();
-      if (currentTrack) {
+      const position = await TrackPlayer.getProgress();
+      const currentTrack = await TrackPlayer.getActiveTrackIndex();
+      if (currentTrack !== null && currentTrack !== undefined) {
         const trackObject = await TrackPlayer.getTrack(currentTrack);
-        await AsyncStorage.setItem('lastSongUrl', trackObject.url);
-        await AsyncStorage.setItem('lastSongPosition', position.toString());
-        customLog('Saved last song state:', { url: trackObject.url, position });
-      }
-      await TrackPlayer.destroy();
-      customLog('TrackPlayer destroyed');
-    } catch (error) {
-      customError('Error in RemoteStop event:', error);
-    }
-  });
-
-  TrackPlayer.addEventListener(Event.RemoteNext, () => {
-    customLog('RemoteNext event received');
-    TrackPlayer.skipToNext();
-  });
-
-  TrackPlayer.addEventListener(Event.RemotePrevious, () => {
-    customLog('RemotePrevious event received');
-    TrackPlayer.skipToPrevious();
-  });
-
-  const playWithRetry = async (retries = 3) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        await TrackPlayer.play();
-        const state = await TrackPlayer.getState();
-        customLog(`Attempt ${i + 1}: PlaybackState after play:`, state);
-        if (state === State.Playing) {
-          customLog('Successfully started playback');
-          return;
+        if (trackObject) {
+          await AsyncStorage.setItem('lastSongUrl', trackObject.url);
+          await AsyncStorage.setItem('lastSongPosition', position.position.toString());
+          customLog('Saved last song state:', { url: trackObject.url, position: position.position });
         }
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-      } catch (error) {
-        customError(`Attempt ${i + 1} failed:`, error);
       }
+    } catch (error) {
+      customError('Error saving state in RemoteStop:', error);
     }
-    customError('Failed to start playback after', retries, 'attempts');
-  };
+  });
 
-  TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async (event) => {
-    customLog('PlaybackQueueEnded event received', event);
+  TrackPlayer.addEventListener(Event.RemoteNext, async () => {
+    customLog('RemoteNext event received');
+    await loadNextTrack();
+  });
+
+  TrackPlayer.addEventListener(Event.RemotePrevious, async () => {
+    customLog('RemotePrevious event received');
+    await loadPreviousTrack();
+  });
+
+  const loadNextTrack = async () => {
+    if (isAutoAdvancing) {
+      customLog('Already auto-advancing, skipping duplicate request');
+      return;
+    }
+    
+    isAutoAdvancing = true;
     try {
-      customLog('Queue ended, fetching next file');
+      customLog('Loading next track');
       const { getNextFile } = require('./apiWrapper');
       const nextFile = await getNextFile();
-      customLog('Next File to play:', nextFile);
-      await TrackPlayer.reset();
-      await TrackPlayer.add({
-        id: '1',
-        url: nextFile,
-        title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
-      });
-      const playerState = await TrackPlayer.getState();
-      customLog('Player state before play:', playerState);
-      const queue = await TrackPlayer.getQueue();
-      console.log('Current queue:', queue);
-      if (queue.length === 0) {
-        customError('No tracks in queue');
-        return;
-      }
-      await new Promise(resolve => setTimeout(resolve, 100));
-      customLog('Trying to request audio focus');
-      const focusGranted = await requestAudioFocus();
-      if (focusGranted) {
-        customLog('Trying to play next file');
-        await playWithRetry();
-      } else {
-        customError('Failed to get audio focus');
-      }
-      customLog('Setting rate to 1.0');
-      await TrackPlayer.setRate(1.0);
-    } catch (error) {
-      customError('Error in PlaybackQueueEnded event:', error);
-    }
-  });
-
-  TrackPlayer.addEventListener(Event.PlaybackState, async (event) => {
-    customLog('PlaybackState changed:', event.state);
-    if (event.state === State.Ready) {
-      customLog('Player is ready, current position:', await TrackPlayer.getPosition());
-      customLog('Current track:', await TrackPlayer.getActiveTrackIndex());
-      customLog('Current track url:', (await TrackPlayer.getTrack(await TrackPlayer.getActiveTrackIndex())).url);
-    } else if (event.state === State.Stopped) {
-      customLog('Playback stopped, checking if queue is empty');
-      const queue = await TrackPlayer.getQueue();
-      if (queue.length === 0) {
-        customLog('Queue is empty, fetching next file');
-        const { getNextFile } = require('./apiWrapper');
-        const nextFile = await getNextFile();
-        customLog('Next file to play:', nextFile);
+      
+      if (nextFile) {
+        customLog('Next File to play:', nextFile);
+        await TrackPlayer.reset();
         await TrackPlayer.add({
-          id: '1',
+          id: Date.now().toString(),
           url: nextFile,
           title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
+          artist: 'Bir Krishna Goswami',
         });
+        
+        // Wait a moment for the track to be added
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const queue = await TrackPlayer.getQueue();
+        customLog('Queue after adding track:', queue.length);
+        
+        if (queue.length > 0) {
+          await TrackPlayer.play();
+          customLog('Started playing next track');
+        } else {
+          customError('No tracks in queue after adding');
+        }
+      } else {
+        customError('No next file available');
+      }
+    } catch (error) {
+      customError('Error in loadNextTrack:', error);
+    } finally {
+      isAutoAdvancing = false;
+    }
+  };
+
+  const loadPreviousTrack = async () => {
+    try {
+      customLog('Loading previous track');
+      const { getPreviousFile } = require('./apiWrapper');
+      const previousFile = await getPreviousFile();
+      
+      if (previousFile && previousFile !== 0) {
+        customLog('Previous File to play:', previousFile);
+        await TrackPlayer.reset();
+        await TrackPlayer.add({
+          id: Date.now().toString(),
+          url: previousFile,
+          title: previousFile.split('/').pop().replace(/\.mp3$/, ''),
+          artist: 'Bir Krishna Goswami',
+        });
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
         await TrackPlayer.play();
-        customLog('Started playing next file');
+        customLog('Started playing previous track');
+      } else {
+        customLog('No previous file available');
+      }
+    } catch (error) {
+      customError('Error in loadPreviousTrack:', error);
+    }
+  };
+
+  // Handle track changes and auto-advance
+  TrackPlayer.addEventListener(Event.PlaybackTrackChanged, async (event) => {
+    customLog('PlaybackTrackChanged:', event);
+    
+    if (event.nextTrack !== null && event.nextTrack !== undefined) {
+      try {
+        const track = await TrackPlayer.getTrack(event.nextTrack);
+        if (track) {
+          customLog('Now playing:', track.title);
+        }
+      } catch (error) {
+        customError('Error getting track info:', error);
       }
     }
   });
 
-  TrackPlayer.addEventListener(Event.PlaybackError, (error) => {
+  // Handle playback state changes
+  TrackPlayer.addEventListener(Event.PlaybackState, async (event) => {
+    customLog('PlaybackState changed:', event.state);
+    
+    if (event.state === State.Ready) {
+      try {
+        const position = await TrackPlayer.getProgress();
+        const currentTrack = await TrackPlayer.getActiveTrackIndex();
+        customLog('Player is ready, position:', position.position, 'track:', currentTrack);
+      } catch (error) {
+        customError('Error getting player info in Ready state:', error);
+      }
+    }
+  });
+
+  // Handle queue ending - this is the key for continuous playback
+  TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async (event) => {
+    customLog('PlaybackQueueEnded event received', event);
+    
+    // Auto-advance to next track
+    await loadNextTrack();
+  });
+
+  // Handle playback errors
+  TrackPlayer.addEventListener(Event.PlaybackError, async (error) => {
     customError('PlaybackError occurred:', error);
+    
+    // Try to recover by loading the next track
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+      await loadNextTrack();
+    } catch (recoveryError) {
+      customError('Failed to recover from playback error:', recoveryError);
+    }
   });
 
-  TrackPlayer.addEventListener(Event.PlaybackTrackChanged, (event) => {
-    customLog('PlaybackTrackChanged:', event);
-  });
-
+  // Handle audio interruptions (calls, notifications, etc.)
   TrackPlayer.addEventListener('remote-duck', async (event) => {
+    customLog('Audio ducking event:', event);
+    
     if (event.permanent) {
+      // Permanent interruption (like a phone call)
       await TrackPlayer.pause();
     } else {
+      // Temporary interruption (like a notification)
       if (event.paused) {
         await TrackPlayer.pause();
       } else {
-        await TrackPlayer.play();
+        // Resume after interruption
+        const focusGranted = await requestAudioFocus();
+        if (focusGranted) {
+          await TrackPlayer.play();
+        }
       }
     }
   });
