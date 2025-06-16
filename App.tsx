@@ -1,165 +1,95 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, AppState, Platform, TouchableOpacity } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Text, AppState, Platform, TouchableOpacity, AppStateStatus } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
+import { loadFonts } from './font';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
-import SplashScreen from './SplashScreen';
+import useAudioPlayer from './useAudioPlayer';
 import BasicMusicPlayer from './BasicMusicPlayer';
-import ErrorBoundary from './ErrorBoundary';
 import DebugScreen from './DebugScreen';
+import SplashScreen from './SplashScreen';
 import { registerBackgroundFetch, unregisterBackgroundFetch } from './backgroundFetch';
 import { customLog, customError } from './customLogger';
 
 const setupPlayer = async () => {
   try {
-    await TrackPlayer.setupPlayer({
-      autoHandleInterruptions: true,
-    });
+    await TrackPlayer.setupPlayer({});
     await TrackPlayer.updateOptions({
       android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
       },
-      notificationCapabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-      ],
       capabilities: [
         Capability.Play,
         Capability.Pause,
         Capability.SkipToNext,
         Capability.SkipToPrevious,
+        Capability.SeekTo,
       ],
-      compactCapabilities: [
-        Capability.Play,
-        Capability.Pause,
-      ],
-      progressUpdateEventInterval: 2,
+      compactCapabilities: [Capability.Play, Capability.Pause, Capability.SkipToNext, Capability.SkipToPrevious],
+      progressUpdateEventInterval: 1,
     });
 
     if (Platform.OS === 'android') {
       await TrackPlayer.setPlayWhenReady(true);
     }
   } catch (e) {
-    console.log('Error setting up player:', e);
+    customError('Error setting up player:', e);
   }
 };
 
 const App: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(true);
   const [isSongLoaded, setIsSongLoaded] = useState(false);
+  const [isFontLoaded, setIsFontLoaded] = useState(false);
   const appState = useRef(AppState.currentState);
   const [showDebugScreen, setShowDebugScreen] = useState(false);
-  const debugTapCount = useRef(0);
-  const lastTapTime = useRef(0);
 
   useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        customLog('Initializing app');
-        await setupPlayer();
-        await registerBackgroundFetch();
+    loadFonts().then(() => setIsFontLoaded(true));
+    setupPlayer();
+    registerBackgroundFetch();
 
-        if (Platform.OS === 'ios') {
-          await Audio.setAudioModeAsync({
-            staysActiveInBackground: true,
-            interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-            playsInSilentModeIOS: true,
-          });
-        } else {
-          await Audio.setAudioModeAsync({
-            staysActiveInBackground: true,
-            shouldDuckAndroid: true,
-            playThroughEarpieceAndroid: false,
-            interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-          });
-        }
-
-        customLog('App initialization complete');
-      } catch (error) {
-        customError('Error during app initialization:', error);
-      }
-    };
-
-    initializeApp();
-
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+        appState.current = nextAppState;
+    });
+    
+    // Timer to show debug screen, can be removed if not needed
     const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, 3000);
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+        // This is a simple way to trigger it, you might want a better method
+        // setShowDebugScreen(true); 
+    }, 5000);
 
     return () => {
       clearTimeout(timer);
       subscription.remove();
-      unregisterBackgroundFetch
+      unregisterBackgroundFetch();
     };
   }, []);
 
-  const handleAppStateChange = async (nextAppState: string) => {
-    if (appState.current.match(/active/) && nextAppState === 'background') {
-      // App is moving to the background
-      await TrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification
-        }
-      });
-    } else if (appState.current === 'background' && nextAppState === 'active') {
-      // App is coming to the foreground
-      await TrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
-        }
-      });
-    }
-    appState.current = nextAppState;
+  const onSongLoaded = (isLoaded: boolean) => {
+    setIsSongLoaded(isLoaded);
   };
 
-  const handleHeaderPress = () => {
-    const now = Date.now();
-    if (now - lastTapTime.current < 500) {
-      debugTapCount.current += 1;
-      if (debugTapCount.current >= 5) {
-        setShowDebugScreen(true);
-        debugTapCount.current = 0;
-      }
-    } else {
-      debugTapCount.current = 1;
-    }
-    lastTapTime.current = now;
-  };
+  const audioPlayerData = useAudioPlayer(onSongLoaded);
 
-  const handleSongLoaded = (loaded: boolean) => {
-    setIsSongLoaded(loaded);
-  };
-
-  if (showDebugScreen) {
-    return <DebugScreen onClose={() => setShowDebugScreen(false)} />;
+  if (!isFontLoaded) {
+    return <SplashScreen />;
   }
 
   return (
     <View style={styles.container}>
-      {isVisible ? (
-        <SplashScreen />
+      {showDebugScreen ? (
+        <DebugScreen onClose={() => setShowDebugScreen(false)} />
       ) : (
         <>
           <View style={styles.content}>
-            <TouchableOpacity onPress={handleHeaderPress}>
+            <TouchableOpacity onPress={() => setShowDebugScreen(true)}>
               <View style={styles.headerContainer}>
                 <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.textContainer}>
-              {!isSongLoaded && (
-                <Text style={styles.text}>
-                  Your audio will start playing automatically!
-                </Text>
-              )}
-            </View>
           </View>
           <SafeAreaView style={styles.buttonContainer}>
-            <BasicMusicPlayer onSongLoaded={handleSongLoaded} />
+            <BasicMusicPlayer onSongLoaded={onSongLoaded} />
           </SafeAreaView>
         </>
       )}
@@ -171,43 +101,31 @@ const App: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    width: '100%',
-    backgroundColor: '#EDC992',
-    justifyContent: 'space-between',
-    paddingTop: 50,
+    backgroundColor: '#F5F5F5',
   },
   content: {
     flex: 1,
-  },
-  textContainer: {
-    backgroundColor: '#EDC992',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   headerContainer: {
-    backgroundColor: '#C68446',
+    position: 'absolute',
+    top: 60,
+    alignItems: 'center',
     width: '100%',
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  buttonContainer: {
-    marginBottom: 100,
-    alignItems: 'center',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    backgroundColor: '#C68446',
-    width: '100%',
-    height: 40,
-    textAlign: 'center',
+    color: '#333',
+    fontFamily: 'Satoshi-Bold',
   },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#F5F5F5',
   },
 });
 
