@@ -120,15 +120,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerContainer: {
-    position: 'absolute',
-    top: 60,
-    alignItems: 'center',
+    backgroundColor: '#C68446',
     width: '100%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFFFFF',
     fontFamily: 'Satoshi-Bold',
   },
   buttonContainer: {
