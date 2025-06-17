@@ -22,6 +22,10 @@ module.exports = ({ config }) => {
         UIBackgroundModes: ["audio", "fetch", "background-processing"]
       },
       buildNumber: "17",
+      config: {
+        usesSwift: true,
+        swiftVersion: "5.0"
+      }
     },
     android: {
       package: isDebug ? "com.iskcon.bkgaudio.debug" : "com.iskcon.bkgaudio",

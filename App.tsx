@@ -3,12 +3,24 @@ import { View, SafeAreaView, StyleSheet, Text, AppState, Platform, TouchableOpac
 import { StatusBar } from 'expo-status-bar';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
+import * as Font from 'expo-font';
 import useAudioPlayer from './useAudioPlayer';
 import BasicMusicPlayer from './BasicMusicPlayer';
 import DebugScreen from './DebugScreen';
 import SplashScreen from './SplashScreen';
 import { registerBackgroundFetch, unregisterBackgroundFetch } from './backgroundFetch';
 import { customLog, customError } from './customLogger';
+
+const loadFonts = async () => {
+  try {
+    await Font.loadAsync({
+      'Satoshi-Bold': require('./assets/fonts/Satoshi-Bold.otf'),
+      'Satoshi-Regular': require('./assets/fonts/Satoshi-Regular.otf'),
+    });
+  } catch (error) {
+    customError('Error loading fonts:', error);
+  }
+};
 
 const setupPlayer = async () => {
   try {

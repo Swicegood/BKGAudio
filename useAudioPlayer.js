@@ -12,6 +12,7 @@ const useAudioPlayer = (onSongLoaded) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [songTitle, setSongTitle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTestMode, setIsTestMode] = useState(false);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
@@ -76,24 +77,67 @@ const useAudioPlayer = (onSongLoaded) => {
   useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState, Event.PlaybackError], async (event) => {
     if (event.type === Event.PlaybackError) {
       customError('Playback error:', event.error);
-      // Handle the error, possibly by loading the next track
       await debouncedLoadNextFile();
     } else if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
       const track = await TrackPlayer.getTrack(event.nextTrack);
       if (track) {
         setSongTitle(track.title);
         onSongLoaded(true);
-        isTrackEnded = true;
+        isTrackEnded = false;
+        
+        // Apply test mode to new track
+        if (isTestMode) {
+          customLog('New track loaded in test mode, seeking to last 15 seconds');
+          try {
+            // Wait a moment for the track to be fully loaded
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const trackDuration = await TrackPlayer.getDuration();
+            if (trackDuration > 15) {
+              const seekPosition = trackDuration - 15;
+              customLog('Seeking new track to position:', seekPosition);
+              await TrackPlayer.seekTo(seekPosition);
+            }
+          } catch (error) {
+            customError('Error seeking new track in test mode:', error);
+          }
+        }
       }
     } else if (event.type === Event.PlaybackState) {
-      if (event.state === State.Stopped && isTrackEnded) {
-        await debouncedLoadNextFile();
-        isTrackEnded = false;
+      if (event.state === State.Stopped) {
+        customLog('Playback stopped, checking if track ended');
+        if (isTrackEnded) {
+          customLog('Track ended, loading next file');
+          await debouncedLoadNextFile();
+          isTrackEnded = false;
+        }
       }
       setIsPlaying(event.state === State.Playing);
     }
   });
 
+  // Add progress monitoring with more frequent checks
+  useEffect(() => {
+    const checkProgress = async () => {
+      if (isPlaying) {
+        try {
+          const currentPosition = await TrackPlayer.getPosition();
+          const currentDuration = await TrackPlayer.getDuration();
+          
+          // If we're within 0.5 seconds of the end, mark track as ended
+          if (currentDuration - currentPosition <= 0.5) {
+            customLog('Track near end, marking as ended');
+            isTrackEnded = true;
+            await TrackPlayer.stop();
+          }
+        } catch (error) {
+          customError('Error checking progress:', error);
+        }
+      }
+    };
+
+    const progressInterval = setInterval(checkProgress, 100); // Check every 100ms
+    return () => clearInterval(progressInterval);
+  }, [isPlaying]);
 
   const loadRandomFile = async () => {
     try {
@@ -128,6 +172,9 @@ const useAudioPlayer = (onSongLoaded) => {
     setIsLoading(true);
 
     try {
+      customLog('Loading file:', fileUrl);
+      customLog('Test mode status:', isTestMode);
+      
       await TrackPlayer.reset();
       await TrackPlayer.add({
         id: '1',
@@ -135,6 +182,24 @@ const useAudioPlayer = (onSongLoaded) => {
         title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
       });
       setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
+      
+      // Apply test mode immediately after adding the track
+      if (isTestMode) {
+        customLog('Test mode enabled, seeking to last 15 seconds');
+        try {
+          // Wait a moment for the track to be fully loaded
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const trackDuration = await TrackPlayer.getDuration();
+          if (trackDuration > 15) {
+            const seekPosition = trackDuration - 15;
+            customLog('Seeking to position:', seekPosition);
+            await TrackPlayer.seekTo(seekPosition);
+          }
+        } catch (error) {
+          customError('Error seeking in test mode:', error);
+        }
+      }
+      
       await TrackPlayer.play();
     } catch (error) {
       customError('Error in loadFile:', error);
@@ -294,12 +359,35 @@ const useAudioPlayer = (onSongLoaded) => {
     };
   }, []); 
 
+  // Add a useEffect to handle test mode changes
+  useEffect(() => {
+    const handleTestModeChange = async () => {
+      if (isTestMode) {
+        customLog('Test mode enabled, seeking current track to last 15 seconds');
+        try {
+          const trackDuration = await TrackPlayer.getDuration();
+          if (trackDuration > 15) {
+            const seekPosition = trackDuration - 15;
+            customLog('Seeking to position:', seekPosition);
+            await TrackPlayer.seekTo(seekPosition);
+          }
+        } catch (error) {
+          customError('Error seeking in test mode:', error);
+        }
+      }
+    };
+
+    handleTestModeChange();
+  }, [isTestMode]);
+
   return {
     isLoading,
     isPlaying,
     songTitle,
     duration,
     position,
+    isTestMode,
+    toggleTestMode: () => setIsTestMode(!isTestMode),
     togglePlayback,
     seekBackward,
     seekForward,

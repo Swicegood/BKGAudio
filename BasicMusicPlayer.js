@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, TouchableOpacity, Text } from "react-native";
 import AudioControls from './AudioControls';
 import ProgressBar from './ProgressBar';
 import SongTitle from './SongTitle';
@@ -13,6 +13,8 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
     songTitle,
     duration,
     position,
+    isTestMode,
+    toggleTestMode,
     togglePlayback,
     seekBackward,
     seekForward,
@@ -41,6 +43,14 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
         onNext={loadNextFile}
         disabled={isLoading}
       />
+      <TouchableOpacity 
+        style={[styles.testModeButton, isTestMode && styles.testModeButtonActive]} 
+        onPress={toggleTestMode}
+      >
+        <Text style={styles.testModeButtonText}>
+          {isTestMode ? 'Test Mode: ON' : 'Test Mode: OFF'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -14,7 +14,9 @@
     "expo": "^50.0.21",
     "expo-av": "~13.10.6",
     "expo-background-fetch": "~11.8.1",
-    "expo-dev-client": "~3.3.12",
+    "expo-clipboard": "~5.0.1",
+    "expo-dev-client": "^5.2.0",
+    "expo-dev-menu": "^6.1.11",
     "expo-linear-gradient": "~12.7.2",
     "expo-splash-screen": "~0.26.5",
     "expo-status-bar": "~1.11.1",
@@ -28,8 +30,7 @@
     "react-native-splash-screen": "^3.3.0",
     "react-native-track-player": "^4.1.1",
     "react-native-vector-icons": "^10.1.0",
-    "react-native-web": "~0.19.6",
-    "expo-clipboard": "~5.0.1"
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

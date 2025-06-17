@@ -74,4 +74,20 @@ export default StyleSheet.create({
     color: '#333',
     marginTop: 5,
   },
+  testModeButton: {
+    backgroundColor: '#4A4A4A',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  testModeButtonActive: {
+    backgroundColor: '#C68446',
+  },
+  testModeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Satoshi-Regular',
+  },
 });
