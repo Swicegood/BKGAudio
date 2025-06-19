@@ -13,13 +13,13 @@ const useAudioPlayer = (onSongLoaded) => {
   const [songTitle, setSongTitle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isTestMode, setIsTestMode] = useState(false);
+  const [isTrackEnded, setIsTrackEnded] = useState(false);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
   const watchdogIntervalRef = useRef(null);
+  const nextTrackUrl = useRef(null);
   const { position, duration } = useProgress();
-
-  let isTrackEnded = false;
 
   const ensureAudioSessionActive = async () => {
     try {
@@ -36,7 +36,6 @@ const useAudioPlayer = (onSongLoaded) => {
       console.error('Error reactivating audio session:', error);
     }
   };
-
 
   useEffect(() => {
     const setupAudioAndWatchdog = async () => {
@@ -77,45 +76,44 @@ const useAudioPlayer = (onSongLoaded) => {
   useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState, Event.PlaybackError], async (event) => {
     if (event.type === Event.PlaybackError) {
       customError('Playback error:', event.error);
+      nextTrackUrl.current = null; // Reset next track URL on error
       await debouncedLoadNextFile();
     } else if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
       const track = await TrackPlayer.getTrack(event.nextTrack);
       if (track) {
         setSongTitle(track.title);
         onSongLoaded(true);
-        isTrackEnded = false;
+        setIsTrackEnded(false);
+        nextTrackUrl.current = null; // Reset next track URL as it's now the current track
         
         // Apply test mode to new track
         if (isTestMode) {
           customLog('New track loaded in test mode, seeking to last 15 seconds');
           try {
-            // Wait a moment for the track to be fully loaded
             await new Promise(resolve => setTimeout(resolve, 500));
             const trackDuration = await TrackPlayer.getDuration();
             if (trackDuration > 15) {
               const seekPosition = trackDuration - 15;
-              customLog('Seeking new track to position:', seekPosition);
+              customLog('Seeking to position:', seekPosition);
               await TrackPlayer.seekTo(seekPosition);
             }
           } catch (error) {
-            customError('Error seeking new track in test mode:', error);
+            customError('Error seeking in test mode:', error);
           }
         }
       }
     } else if (event.type === Event.PlaybackState) {
-      if (event.state === State.Stopped) {
-        customLog('Playback stopped, checking if track ended');
-        if (isTrackEnded) {
-          customLog('Track ended, loading next file');
-          await debouncedLoadNextFile();
-          isTrackEnded = false;
-        }
-      }
       setIsPlaying(event.state === State.Playing);
+      if (event.state === State.Stopped && isTrackEnded) {
+        customLog('Track ended, transitioning to next track');
+        await TrackPlayer.skipToNext();
+        await TrackPlayer.play();
+        setIsTrackEnded(false);
+      }
     }
   });
 
-  // Add progress monitoring with more frequent checks
+  // Progress monitoring with preloading logic
   useEffect(() => {
     const checkProgress = async () => {
       if (isPlaying) {
@@ -123,11 +121,17 @@ const useAudioPlayer = (onSongLoaded) => {
           const currentPosition = await TrackPlayer.getPosition();
           const currentDuration = await TrackPlayer.getDuration();
           
-          // If we're within 0.5 seconds of the end, mark track as ended
-          if (currentDuration - currentPosition <= 0.5) {
-            customLog('Track near end, marking as ended');
-            isTrackEnded = true;
-            await TrackPlayer.stop();
+          // Preload next track when we're 30 seconds from the end
+          if (currentDuration > 30 && currentDuration - currentPosition <= 30) {
+            await preloadNextTrack();
+          }
+          
+          // If we're within 0.5 seconds of the end, transition to next track
+          if (currentDuration > 0 && currentDuration - currentPosition <= 0.5) {
+            customLog('Track near end, transitioning to next track');
+            setIsTrackEnded(true);
+            await TrackPlayer.skipToNext();
+            await TrackPlayer.play();
           }
         } catch (error) {
           customError('Error checking progress:', error);
@@ -135,7 +139,7 @@ const useAudioPlayer = (onSongLoaded) => {
       }
     };
 
-    const progressInterval = setInterval(checkProgress, 100); // Check every 100ms
+    const progressInterval = setInterval(checkProgress, 100);
     return () => clearInterval(progressInterval);
   }, [isPlaying]);
 
@@ -177,17 +181,19 @@ const useAudioPlayer = (onSongLoaded) => {
       
       await TrackPlayer.reset();
       await TrackPlayer.add({
-        id: '1',
+        id: 'current',
         url: fileUrl,
         title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
       });
       setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
       
-      // Apply test mode immediately after adding the track
+      // Preload next track immediately after loading current track
+      nextTrackUrl.current = null;
+      await preloadNextTrack();
+      
       if (isTestMode) {
         customLog('Test mode enabled, seeking to last 15 seconds');
         try {
-          // Wait a moment for the track to be fully loaded
           await new Promise(resolve => setTimeout(resolve, 500));
           const trackDuration = await TrackPlayer.getDuration();
           if (trackDuration > 15) {
@@ -379,6 +385,27 @@ const useAudioPlayer = (onSongLoaded) => {
 
     handleTestModeChange();
   }, [isTestMode]);
+
+  // Function to preload the next track
+  const preloadNextTrack = async () => {
+    try {
+      if (!nextTrackUrl.current) {
+        const nextFile = await getNextFile();
+        customLog('Preloading next track:', nextFile);
+        nextTrackUrl.current = nextFile;
+        
+        // Add to queue but don't start playing
+        await TrackPlayer.add({
+          id: 'next',
+          url: nextFile,
+          title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
+        });
+        customLog('Next track preloaded successfully');
+      }
+    } catch (error) {
+      customError('Error preloading next track:', error);
+    }
+  };
 
   return {
     isLoading,
