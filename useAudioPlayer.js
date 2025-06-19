@@ -85,25 +85,27 @@ const useAudioPlayer = (onSongLoaded) => {
         onSongLoaded(true);
         setIsTrackEnded(false);
         nextTrackUrl.current = null; // Reset next track URL as it's now the current track
-        
-        // Apply test mode to new track
-        if (isTestMode) {
-          customLog('New track loaded in test mode, seeking to last 15 seconds');
-          try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const trackDuration = await TrackPlayer.getDuration();
-            if (trackDuration > 15) {
-              const seekPosition = trackDuration - 15;
-              customLog('Seeking to position:', seekPosition);
-              await TrackPlayer.seekTo(seekPosition);
-            }
-          } catch (error) {
-            customError('Error seeking in test mode:', error);
-          }
-        }
       }
     } else if (event.type === Event.PlaybackState) {
       setIsPlaying(event.state === State.Playing);
+      
+      // Apply test mode when track is ready
+      if (event.state === State.Ready && isTestMode) {
+        customLog('Track ready in test mode, seeking to last 31 seconds');
+        try {
+          // Wait a short moment for duration to be available
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const trackDuration = await TrackPlayer.getDuration();
+          if (trackDuration > 31) {
+            const seekPosition = trackDuration - 31;
+            customLog('Seeking to position:', seekPosition);
+            await TrackPlayer.seekTo(seekPosition);
+          }
+        } catch (error) {
+          customError('Error seeking in test mode:', error);
+        }
+      }
+      
       if (event.state === State.Stopped && isTrackEnded) {
         customLog('Track ended, transitioning to next track');
         await TrackPlayer.skipToNext();
@@ -192,12 +194,12 @@ const useAudioPlayer = (onSongLoaded) => {
       await preloadNextTrack();
       
       if (isTestMode) {
-        customLog('Test mode enabled, seeking to last 15 seconds');
+        customLog('Test mode enabled, seeking to last 31 seconds');
         try {
           await new Promise(resolve => setTimeout(resolve, 500));
           const trackDuration = await TrackPlayer.getDuration();
-          if (trackDuration > 15) {
-            const seekPosition = trackDuration - 15;
+          if (trackDuration > 31) {
+            const seekPosition = trackDuration - 31;
             customLog('Seeking to position:', seekPosition);
             await TrackPlayer.seekTo(seekPosition);
           }
@@ -369,11 +371,11 @@ const useAudioPlayer = (onSongLoaded) => {
   useEffect(() => {
     const handleTestModeChange = async () => {
       if (isTestMode) {
-        customLog('Test mode enabled, seeking current track to last 15 seconds');
+        customLog('Test mode enabled, seeking current track to last 31 seconds');
         try {
           const trackDuration = await TrackPlayer.getDuration();
-          if (trackDuration > 15) {
-            const seekPosition = trackDuration - 15;
+          if (trackDuration > 31) {
+            const seekPosition = trackDuration - 31;
             customLog('Seeking to position:', seekPosition);
             await TrackPlayer.seekTo(seekPosition);
           }
