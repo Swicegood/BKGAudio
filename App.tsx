@@ -116,17 +116,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
   },
   headerContainer: {
     backgroundColor: '#C68446',
     width: '100%',
-    height: 40,
+    paddingTop: Platform.OS === 'ios' ? 50 : 40,
+    paddingBottom: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute',
-    top: 0,
   },
   header: {
     fontSize: 24,
