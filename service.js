@@ -23,14 +23,20 @@ const requestAudioFocus = async () => {
 module.exports = async function () {
   customLog('Service function started');
 
-  TrackPlayer.addEventListener(Event.RemotePlay, () => {
+  TrackPlayer.addEventListener(Event.RemotePlay, async () => {
     customLog('RemotePlay event received');
-    TrackPlayer.play();
+    await TrackPlayer.play();
+    // User manually started playing from lock screen/notification, so it's okay to auto-resume later
+    await AsyncStorage.setItem('wasPlayingWhenLeft', 'true');
+    customLog('User started playing from lock screen/notification, set wasPlayingWhenLeft to true');
   });
 
-  TrackPlayer.addEventListener(Event.RemotePause, () => {
+  TrackPlayer.addEventListener(Event.RemotePause, async () => {
     customLog('RemotePause event received');
-    TrackPlayer.pause();
+    await TrackPlayer.pause();
+    // User manually paused from lock screen/notification, so don't auto-resume later
+    await AsyncStorage.setItem('wasPlayingWhenLeft', 'false');
+    customLog('User paused from lock screen/notification, set wasPlayingWhenLeft to false');
   });
 
   TrackPlayer.addEventListener(Event.RemoteStop, async () => {
@@ -44,6 +50,9 @@ module.exports = async function () {
         await AsyncStorage.setItem('lastSongPosition', position.toString());
         customLog('Saved last song state:', { url: trackObject.url, position });
       }
+      // User manually stopped, so don't auto-resume later
+      await AsyncStorage.setItem('wasPlayingWhenLeft', 'false');
+      customLog('User stopped from lock screen/notification, set wasPlayingWhenLeft to false');
       await TrackPlayer.destroy();
       customLog('TrackPlayer destroyed');
     } catch (error) {
@@ -83,35 +92,42 @@ module.exports = async function () {
   TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async (event) => {
     customLog('PlaybackQueueEnded event received', event);
     try {
-      customLog('Queue ended, fetching next file');
-      const { getNextFile } = require('./apiWrapper');
-      const nextFile = await getNextFile();
-      customLog('Next File to play:', nextFile);
-      await TrackPlayer.reset();
-      await TrackPlayer.add({
-        id: '1',
-        url: nextFile,
-        title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
-      });
-      const playerState = await TrackPlayer.getState();
-      customLog('Player state before play:', playerState);
-      const queue = await TrackPlayer.getQueue();
-      console.log('Current queue:', queue);
-      if (queue.length === 0) {
-        customError('No tracks in queue');
-        return;
-      }
-      await new Promise(resolve => setTimeout(resolve, 100));
-      customLog('Trying to request audio focus');
-      const focusGranted = await requestAudioFocus();
-      if (focusGranted) {
-        customLog('Trying to play next file');
-        await playWithRetry();
+      // Check if user was playing when they left the app
+      const wasPlayingWhenLeft = await AsyncStorage.getItem('wasPlayingWhenLeft');
+      
+      if (wasPlayingWhenLeft === 'true') {
+        customLog('Queue ended, fetching next file');
+        const { getNextFile } = require('./apiWrapper');
+        const nextFile = await getNextFile();
+        customLog('Next File to play:', nextFile);
+        await TrackPlayer.reset();
+        await TrackPlayer.add({
+          id: '1',
+          url: nextFile,
+          title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
+        });
+        const playerState = await TrackPlayer.getState();
+        customLog('Player state before play:', playerState);
+        const queue = await TrackPlayer.getQueue();
+        console.log('Current queue:', queue);
+        if (queue.length === 0) {
+          customError('No tracks in queue');
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, 100));
+        customLog('Trying to request audio focus');
+        const focusGranted = await requestAudioFocus();
+        if (focusGranted) {
+          customLog('Trying to play next file');
+          await playWithRetry();
+        } else {
+          customError('Failed to get audio focus');
+        }
+        customLog('Setting rate to 1.0');
+        await TrackPlayer.setRate(1.0);
       } else {
-        customError('Failed to get audio focus');
+        customLog('User was not playing when they left, not auto-playing next track');
       }
-      customLog('Setting rate to 1.0');
-      await TrackPlayer.setRate(1.0);
     } catch (error) {
       customError('Error in PlaybackQueueEnded event:', error);
     }
@@ -124,20 +140,26 @@ module.exports = async function () {
       customLog('Current track:', await TrackPlayer.getActiveTrackIndex());
       customLog('Current track url:', (await TrackPlayer.getTrack(await TrackPlayer.getActiveTrackIndex())).url);
     } else if (event.state === State.Stopped) {
-      customLog('Playback stopped, checking if queue is empty');
-      const queue = await TrackPlayer.getQueue();
-      if (queue.length === 0) {
-        customLog('Queue is empty, fetching next file');
-        const { getNextFile } = require('./apiWrapper');
-        const nextFile = await getNextFile();
-        customLog('Next file to play:', nextFile);
-        await TrackPlayer.add({
-          id: '1',
-          url: nextFile,
-          title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
-        });
-        await TrackPlayer.play();
-        customLog('Started playing next file');
+      customLog('Playback stopped, checking if should auto-restart');
+      const wasPlayingWhenLeft = await AsyncStorage.getItem('wasPlayingWhenLeft');
+      
+      if (wasPlayingWhenLeft === 'true') {
+        const queue = await TrackPlayer.getQueue();
+        if (queue.length === 0) {
+          customLog('Queue is empty, fetching next file');
+          const { getNextFile } = require('./apiWrapper');
+          const nextFile = await getNextFile();
+          customLog('Next file to play:', nextFile);
+          await TrackPlayer.add({
+            id: '1',
+            url: nextFile,
+            title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
+          });
+          await TrackPlayer.play();
+          customLog('Started playing next file');
+        }
+      } else {
+        customLog('User was not playing when they left, not auto-restarting playback');
       }
     }
   });
