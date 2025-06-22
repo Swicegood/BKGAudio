@@ -23,14 +23,18 @@ const requestAudioFocus = async () => {
 module.exports = async function () {
   customLog('Service function started');
 
-  TrackPlayer.addEventListener(Event.RemotePlay, () => {
+  TrackPlayer.addEventListener(Event.RemotePlay, async () => {
     customLog('RemotePlay event received');
-    TrackPlayer.play();
+    await TrackPlayer.play();
+    // User started playing from lockscreen - okay to auto-resume later
+    await AsyncStorage.setItem('wasPlayingWhenLeft', 'true');
   });
 
-  TrackPlayer.addEventListener(Event.RemotePause, () => {
+  TrackPlayer.addEventListener(Event.RemotePause, async () => {
     customLog('RemotePause event received');
-    TrackPlayer.pause();
+    await TrackPlayer.pause();
+    // User paused from lockscreen - don't auto-resume later
+    await AsyncStorage.setItem('wasPlayingWhenLeft', 'false');
   });
 
   TrackPlayer.addEventListener(Event.RemoteStop, async () => {
@@ -44,6 +48,8 @@ module.exports = async function () {
         await AsyncStorage.setItem('lastSongPosition', position.toString());
         customLog('Saved last song state:', { url: trackObject.url, position });
       }
+      // User stopped - don't auto-resume later
+      await AsyncStorage.setItem('wasPlayingWhenLeft', 'false');
       await TrackPlayer.destroy();
       customLog('TrackPlayer destroyed');
     } catch (error) {
