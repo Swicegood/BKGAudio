@@ -189,10 +189,6 @@ const useAudioPlayer = (onSongLoaded) => {
       });
       setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
       
-      // Preload next track immediately after loading current track
-      nextTrackUrl.current = null;
-      await preloadNextTrack();
-      
       if (isTestMode) {
         customLog('Test mode enabled, seeking to last 31 seconds');
         try {
