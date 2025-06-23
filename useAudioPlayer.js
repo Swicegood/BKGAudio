@@ -123,8 +123,8 @@ const useAudioPlayer = (onSongLoaded) => {
           const currentPosition = await TrackPlayer.getPosition();
           const currentDuration = await TrackPlayer.getDuration();
           
-          // Preload next track when we're 30 seconds from the end
-          if (currentDuration > 30 && currentDuration - currentPosition <= 30) {
+          // Don't preload in test mode
+          if (currentDuration > 30 && currentDuration - currentPosition <= 30 && !isTestMode) {
             await preloadNextTrack();
           }
           
