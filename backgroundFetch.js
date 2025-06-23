@@ -1,33 +1,15 @@
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-import TrackPlayer, { State } from 'react-native-track-player';
 import { customLog, customError } from './customLogger';
-import StorageManager from './StorageManager';
 
 const BACKGROUND_FETCH_TASK = 'background-fetch';
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   try {
     customLog('Background fetch started');
-    
-    // Only resume playback if user was actually playing when they left the app
-    const wasPlayingWhenLeft = await StorageManager.getItem('wasPlayingWhenLeft');
-    
-    if (wasPlayingWhenLeft === 'true') {
-      const currentState = await TrackPlayer.getState();
-      customLog('Current TrackPlayer state:', currentState);
-      
-      // Only resume if the player is paused or ready, not if it's already playing
-      if (currentState === State.Paused || currentState === State.Ready) {
-        customLog('Resuming playback from background fetch');
-        await TrackPlayer.play();
-      } else {
-        customLog('TrackPlayer already in playing state, no action needed');
-      }
-    } else {
-      customLog('User was not playing when they left the app, not resuming playback');
-    }
-    
+    // Your background fetch logic here
+      // No track playing, try to start the next one
+    await TrackPlayer.play();
     customLog('Background fetch completed');
     return BackgroundFetch.BackgroundFetchResult.NewData;
   } catch (error) {

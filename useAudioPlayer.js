@@ -164,8 +164,6 @@ const useAudioPlayer = (onSongLoaded) => {
         customLog('onSongLoaded(true) called');
         await TrackPlayer.play();
         customLog('TrackPlayer.play() called');
-        // Track that user started playing
-        await StorageManager.setItem('wasPlayingWhenLeft', 'true');
       }
     } catch (error) {
       customError('Error in loadRandomFile:', error);
@@ -211,8 +209,6 @@ const useAudioPlayer = (onSongLoaded) => {
       }
       
       await TrackPlayer.play();
-      // Track that user started playing
-      await StorageManager.setItem('wasPlayingWhenLeft', 'true');
     } catch (error) {
       customError('Error in loadFile:', error);
     } finally {
@@ -237,12 +233,8 @@ const useAudioPlayer = (onSongLoaded) => {
     const currentState = await TrackPlayer.getState();
     if (currentState === State.Playing) {
       await TrackPlayer.pause();
-      // User paused - don't auto-resume later
-      await StorageManager.setItem('wasPlayingWhenLeft', 'false');
     } else {
       await TrackPlayer.play();
-      // User resumed - okay to auto-resume later
-      await StorageManager.setItem('wasPlayingWhenLeft', 'true');
     }
   };
 
@@ -258,11 +250,6 @@ const useAudioPlayer = (onSongLoaded) => {
     try {
       const currentProgress = await TrackPlayer.getProgress();
       const currentTrack = await TrackPlayer.getActiveTrackIndex();
-      const currentState = await TrackPlayer.getState();
-      
-      // Track if user was playing when they left the app
-      await StorageManager.setItem('wasPlayingWhenLeft', currentState === State.Playing ? 'true' : 'false');
-      
       if (currentTrack !== null && currentTrack !== undefined) {
         const trackObject = await TrackPlayer.getTrack(currentTrack);
         await StorageManager.setItem('lastSongUrl', trackObject.url);
