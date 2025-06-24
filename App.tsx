@@ -60,13 +60,13 @@ const App: React.FC = () => {
     registerBackgroundFetch();
 
     const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
-        appState.current = nextAppState;
+      appState.current = nextAppState;
     });
-    
+
     // Timer to show debug screen, can be removed if not needed
     const timer = setTimeout(() => {
-        // This is a simple way to trigger it, you might want a better method
-        // setShowDebugScreen(true); 
+      // This is a simple way to trigger it, you might want a better method
+      // setShowDebugScreen(true); 
     }, 5000);
 
     return () => {
@@ -92,12 +92,10 @@ const App: React.FC = () => {
         <DebugScreen onClose={() => setShowDebugScreen(false)} />
       ) : (
         <>
+          <TouchableOpacity onPress={() => setShowDebugScreen(true)} style={styles.headerContainer}>
+            <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
+          </TouchableOpacity>
           <View style={styles.content}>
-            <TouchableOpacity onPress={() => setShowDebugScreen(true)}>
-              <View style={styles.headerContainer}>
-                <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
-              </View>
-            </TouchableOpacity>
           </View>
           <SafeAreaView style={styles.buttonContainer}>
             <BasicMusicPlayer audioPlayerData={audioPlayerData} onSongLoaded={onSongLoaded} />
@@ -125,6 +123,9 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 0,
+    left: 0,
+    right: 0,
   },
   header: {
     fontSize: 24,
