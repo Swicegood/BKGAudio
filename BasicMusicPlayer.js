@@ -3,10 +3,9 @@ import { View, ActivityIndicator, TouchableOpacity, Text } from "react-native";
 import AudioControls from './AudioControls';
 import ProgressBar from './ProgressBar';
 import SongTitle from './SongTitle';
-import useAudioPlayer from './useAudioPlayer';
 import styles from './styles';
 
-const BasicMusicPlayer = ({ onSongLoaded }) => {
+const BasicMusicPlayer = ({ audioPlayerData, onSongLoaded }) => {
   const {
     isLoading,
     isPlaying,
@@ -20,7 +19,7 @@ const BasicMusicPlayer = ({ onSongLoaded }) => {
     seekForward,
     loadPreviousFile,
     loadNextFile,
-  } = useAudioPlayer(onSongLoaded);
+  } = audioPlayerData;
 
   if (isLoading) {
     return (

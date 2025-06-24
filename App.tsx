@@ -100,7 +100,7 @@ const App: React.FC = () => {
             </TouchableOpacity>
           </View>
           <SafeAreaView style={styles.buttonContainer}>
-            <BasicMusicPlayer onSongLoaded={onSongLoaded} />
+            <BasicMusicPlayer audioPlayerData={audioPlayerData} onSongLoaded={onSongLoaded} />
           </SafeAreaView>
         </>
       )}
