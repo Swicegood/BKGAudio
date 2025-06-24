@@ -42,14 +42,6 @@ const BasicMusicPlayer = ({ audioPlayerData, onSongLoaded }) => {
         onNext={loadNextFile}
         disabled={isLoading}
       />
-      <TouchableOpacity 
-        style={[styles.testModeButton, isTestMode && styles.testModeButtonActive]} 
-        onPress={toggleTestMode}
-      >
-        <Text style={styles.testModeButtonText}>
-          {isTestMode ? 'Test Mode: ON' : 'Test Mode: OFF'}
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 };

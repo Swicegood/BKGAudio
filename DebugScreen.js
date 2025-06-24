@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } 
 import { getLogs, clearLogs } from './customLogger';
 import * as Clipboard from 'expo-clipboard';
 
-const DebugScreen = ({ onClose }) => {
+const DebugScreen = ({ onClose, isTestMode, toggleTestMode }) => {
   const [logs, setLogs] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -27,10 +27,7 @@ const DebugScreen = ({ onClose }) => {
     setRefreshing(false);
   };
 
-  const handleClearLogs = async () => {
-    await clearLogs();
-    setLogs([]);
-  };
+
 
   return (
     <View style={styles.container}>
@@ -52,8 +49,13 @@ const DebugScreen = ({ onClose }) => {
         ))}
       </ScrollView>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleClearLogs}>
-          <Text style={styles.buttonText}>Clear Logs</Text>
+        <TouchableOpacity 
+          style={[styles.button, isTestMode && styles.testModeButtonActive]} 
+          onPress={toggleTestMode}
+        >
+          <Text style={styles.buttonText}>
+            {isTestMode ? 'Test Mode: ON' : 'Test Mode: OFF'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={copyLogsToClipboard}>
           <Text style={styles.buttonText}>Copy Logs</Text>
@@ -112,6 +114,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '30%',
     alignItems: 'center',
+  },
+  testModeButtonActive: {
+    backgroundColor: '#4CAF50',
   },
   buttonText: {
     color: 'white',

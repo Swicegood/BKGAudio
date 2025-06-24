@@ -89,13 +89,24 @@ const App: React.FC = () => {
   return (
     <View style={styles.container}>
       {showDebugScreen ? (
-        <DebugScreen onClose={() => setShowDebugScreen(false)} />
+        <DebugScreen 
+          onClose={() => setShowDebugScreen(false)} 
+          isTestMode={audioPlayerData.isTestMode}
+          toggleTestMode={audioPlayerData.toggleTestMode}
+        />
       ) : (
         <>
-          <TouchableOpacity onPress={() => setShowDebugScreen(true)} style={styles.headerContainer}>
-            <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
-          </TouchableOpacity>
           <View style={styles.content}>
+            <TouchableOpacity onPress={() => setShowDebugScreen(true)} style={styles.headerContainer}>
+              <Text style={styles.header}>Bir Krishna Goswami Audio</Text>
+            </TouchableOpacity>
+            <View style={styles.textContainer}>
+              {!isSongLoaded && (
+                <Text style={styles.text}>
+                  Your audio will start playing automatically!
+                </Text>
+              )}
+            </View>
           </View>
           <SafeAreaView style={styles.buttonContainer}>
             <BasicMusicPlayer audioPlayerData={audioPlayerData} onSongLoaded={onSongLoaded} />
@@ -110,35 +121,44 @@ const App: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    width: '100%',
     backgroundColor: '#EDC992',
+    justifyContent: 'space-between',
+    paddingTop: 50,
   },
   content: {
     flex: 1,
+  },
+  textContainer: {
+    backgroundColor: '#EDC992',
     alignItems: 'center',
   },
   headerContainer: {
     backgroundColor: '#C68446',
     width: '100%',
-    paddingTop: Platform.OS === 'ios' ? 50 : 40,
-    paddingBottom: 15,
-    justifyContent: 'center',
+    height: 40,
     alignItems: 'center',
-    marginHorizontal: 0,
-    left: 0,
-    right: 0,
+    justifyContent: 'flex-start',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    backgroundColor: '#C68446',
+    width: '100%',
+    height: 40,
+    textAlign: 'center',
     fontFamily: 'Satoshi-Bold',
   },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   buttonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#EDC992',
+    marginBottom: 100,
+    alignItems: 'center',
   },
 });
 
