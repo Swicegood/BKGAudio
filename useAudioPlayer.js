@@ -18,7 +18,7 @@ const useAudioPlayer = (onSongLoaded) => {
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
   const watchdogIntervalRef = useRef(null);
-  const progressIntervalRef = useRef(null);
+
   const nextTrackUrl = useRef(null);
   const isPreloading = useRef(false);
   const lastPreloadCheck = useRef(0);
@@ -135,20 +135,15 @@ const useAudioPlayer = (onSongLoaded) => {
     }
   });
 
-  // Progress monitoring with preloading logic
+  // Progress monitoring with preloading logic - simplified approach
   useEffect(() => {
-    // Clean up any existing progress interval first
-    if (progressIntervalRef.current) {
-      customLog('Cleaning up existing progress interval before starting new one');
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
+    let interval = null;
+    const intervalId = Math.random();
     
-    const intervalId = Math.random(); // Unique ID for this interval
-    customLog('Starting progress monitoring interval with ID:', intervalId);
-    
-    const checkProgress = async () => {
-      if (isPlaying) {
+    if (isPlaying) {
+      customLog('Starting progress monitoring interval with ID:', intervalId);
+      
+      interval = setInterval(async () => {
         try {
           const currentPosition = await TrackPlayer.getPosition();
           const currentDuration = await TrackPlayer.getDuration();
@@ -169,12 +164,12 @@ const useAudioPlayer = (onSongLoaded) => {
           if (currentDuration > 0 && timeToEnd <= 1.0) {
             // Prevent duplicate transitions
             if (isTransitioning.current) {
-              customLog('Track transition already in progress, skipping');
+              customLog('Track transition already in progress, skipping (interval ID:', intervalId + ')');
               return;
             }
             
             isTransitioning.current = true;
-            customLog('Track near end, transitioning to next track');
+            customLog('Track near end, transitioning to next track (interval ID:', intervalId + ')');
             setIsTrackEnded(true);
             
             // Ensure immediate transition with no gaps
@@ -194,18 +189,17 @@ const useAudioPlayer = (onSongLoaded) => {
         } catch (error) {
           customError('Error checking progress:', error);
         }
-      }
-    };
-
-    progressIntervalRef.current = setInterval(checkProgress, 100);
-    
-    return () => {
-      customLog('Cleaning up progress monitoring interval with ID:', intervalId);
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-    };
+      }, 100);
+         } else {
+       customLog('Not playing, no progress monitoring needed for interval ID:', intervalId);
+     }
+     
+     return () => {
+       customLog('Cleaning up progress monitoring interval with ID:', intervalId);
+       if (interval) {
+         clearInterval(interval);
+       }
+     };
   }, [isPlaying]);
 
   const loadRandomFile = async () => {
