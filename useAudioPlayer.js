@@ -21,6 +21,7 @@ const useAudioPlayer = (onSongLoaded) => {
   const nextTrackUrl = useRef(null);
   const isPreloading = useRef(false);
   const lastPreloadCheck = useRef(0);
+  const lastTestModeSeek = useRef({});
   const { position, duration } = useProgress();
 
   const ensureAudioSessionActive = async () => {
@@ -99,9 +100,24 @@ const useAudioPlayer = (onSongLoaded) => {
           await new Promise(resolve => setTimeout(resolve, 500));
           const trackDuration = await TrackPlayer.getDuration();
           if (trackDuration > 31) {
-            const seekPosition = trackDuration - 31;
-            customLog('Seeking to position:', seekPosition);
-            await TrackPlayer.seekTo(seekPosition);
+            // Get current track info to prevent duplicate seeks
+            const currentTrack = await TrackPlayer.getActiveTrackIndex();
+            const trackObject = await TrackPlayer.getTrack(currentTrack);
+            const trackUrl = trackObject?.url;
+            
+            // Only seek if we haven't already seeked this track recently
+            const now = Date.now();
+            if (!trackUrl || !lastTestModeSeek.current[trackUrl] || now - lastTestModeSeek.current[trackUrl] > 2000) {
+              const seekPosition = trackDuration - 31;
+              customLog('Seeking to position:', seekPosition, 'for track:', trackUrl);
+              await TrackPlayer.seekTo(seekPosition);
+              
+              if (trackUrl) {
+                lastTestModeSeek.current[trackUrl] = now;
+              }
+            } else {
+              customLog('Skipping seek - already seeked this track recently');
+            }
           }
         } catch (error) {
           customError('Error seeking in test mode:', error);
@@ -269,15 +285,22 @@ const useAudioPlayer = (onSongLoaded) => {
   };
 
   const startPlaybackWatchdog = () => {
-  setInterval(async () => {
-    const playerState = await TrackPlayer.getState();
-    if (playerState === State.Ready) {
-      customLog('Player ready but not playing, attempting to resume');
-      await ensureAudioSessionActive();
-      await TrackPlayer.play();
+    // Clean up any existing watchdog first
+    if (watchdogIntervalRef.current) {
+      clearInterval(watchdogIntervalRef.current);
     }
-  }, 5000); // Check every 5 seconds
-};
+    
+    watchdogIntervalRef.current = setInterval(async () => {
+      const playerState = await TrackPlayer.getState();
+      if (playerState === State.Ready) {
+        customLog('Player ready but not playing, attempting to resume');
+        await ensureAudioSessionActive();
+        await TrackPlayer.play();
+      }
+    }, 5000); // Check every 5 seconds
+    
+    return watchdogIntervalRef.current;
+  };
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
@@ -382,9 +405,24 @@ const useAudioPlayer = (onSongLoaded) => {
           
           const trackDuration = await TrackPlayer.getDuration();
           if (trackDuration > 31) {
-            const seekPosition = trackDuration - 31;
-            customLog('Seeking to position:', seekPosition);
-            await TrackPlayer.seekTo(seekPosition);
+            // Get current track info to prevent duplicate seeks
+            const currentTrack = await TrackPlayer.getActiveTrackIndex();
+            const trackObject = await TrackPlayer.getTrack(currentTrack);
+            const trackUrl = trackObject?.url;
+            
+            // Only seek if we haven't already seeked this track recently
+            const now = Date.now();
+            if (!trackUrl || !lastTestModeSeek.current[trackUrl] || now - lastTestModeSeek.current[trackUrl] > 2000) {
+              const seekPosition = trackDuration - 31;
+              customLog('Seeking to position:', seekPosition, 'for track:', trackUrl);
+              await TrackPlayer.seekTo(seekPosition);
+              
+              if (trackUrl) {
+                lastTestModeSeek.current[trackUrl] = now;
+              }
+            } else {
+              customLog('Skipping seek - already seeked this track recently');
+            }
           }
         } catch (error) {
           customError('Error seeking in test mode:', error);
@@ -396,6 +434,7 @@ const useAudioPlayer = (onSongLoaded) => {
         nextTrackUrl.current = null; // Clear preloaded track URL to force fresh preload
         isPreloading.current = false; // Reset preload lock
         lastPreloadCheck.current = 0; // Reset preload debounce timer
+        lastTestModeSeek.current = {}; // Clear test mode seek history
       }
     };
 
@@ -404,15 +443,17 @@ const useAudioPlayer = (onSongLoaded) => {
 
   // Function to preload the next track
   const preloadNextTrack = async () => {
-    // Prevent concurrent calls to avoid race conditions
-    if (isPreloading.current) {
+    // Prevent concurrent calls to avoid race conditions - use atomic check-and-set
+    const wasAlreadyPreloading = isPreloading.current;
+    isPreloading.current = true;
+    
+    if (wasAlreadyPreloading) {
       customLog('Preload already in progress, skipping');
       return;
     }
 
     try {
       if (!nextTrackUrl.current) {
-        isPreloading.current = true;
         customLog('Starting preload operation');
         
         const nextFile = await getNextFile();
