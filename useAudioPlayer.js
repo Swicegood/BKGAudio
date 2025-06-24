@@ -14,6 +14,7 @@ const useAudioPlayer = (onSongLoaded) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isTestMode, setIsTestMode] = useState(false);
   const [isTrackEnded, setIsTrackEnded] = useState(false);
+  const hasAutoPlayedOnce = useRef(false);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
@@ -219,8 +220,15 @@ const useAudioPlayer = (onSongLoaded) => {
         customLog('isLoading set to false');
         onSongLoaded(true);
         customLog('onSongLoaded(true) called');
-        await TrackPlayer.play();
-        customLog('TrackPlayer.play() called');
+        
+        // Only auto-play on the very first load
+        if (!hasAutoPlayedOnce.current) {
+          await TrackPlayer.play();
+          hasAutoPlayedOnce.current = true;
+          customLog('TrackPlayer.play() called - first time auto-play');
+        } else {
+          customLog('Skipping auto-play - not first load');
+        }
       }
     } catch (error) {
       customError('Error in loadRandomFile:', error);
@@ -261,7 +269,14 @@ const useAudioPlayer = (onSongLoaded) => {
         }
       }
       
-      await TrackPlayer.play();
+      // Only auto-play on the very first load
+      if (!hasAutoPlayedOnce.current) {
+        await TrackPlayer.play();
+        hasAutoPlayedOnce.current = true;
+        customLog('TrackPlayer.play() called - first time auto-play');
+      } else {
+        customLog('Skipping auto-play - not first load');
+      }
     } catch (error) {
       customError('Error in loadFile:', error);
     } finally {
@@ -325,10 +340,13 @@ const useAudioPlayer = (onSongLoaded) => {
     
     watchdogIntervalRef.current = setInterval(async () => {
       const playerState = await TrackPlayer.getState();
-      if (playerState === State.Ready) {
-        customLog('Player ready but not playing, attempting to resume');
+      if (playerState === State.Ready && !hasAutoPlayedOnce.current) {
+        customLog('Player ready but not playing, attempting to resume (first load only)');
         await ensureAudioSessionActive();
         await TrackPlayer.play();
+        hasAutoPlayedOnce.current = true;
+      } else if (playerState === State.Ready) {
+        customLog('Player ready but not auto-resuming (not first load)');
       }
     }, 5000); // Check every 5 seconds
     
@@ -385,10 +403,7 @@ const useAudioPlayer = (onSongLoaded) => {
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        TrackPlayer.play();
-      }
-
+      // Removed auto-play on app focus - only track app state changes
       appState.current = nextAppState;
       setAppStateVisible(appState.current);
     });
