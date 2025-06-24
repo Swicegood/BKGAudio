@@ -3,6 +3,9 @@ import { customLog, customError } from './customLogger';
 
 const filesListUrl = "https://atourcity.com/bkgoswami.com/wp/wp-content/uploads/all_files.txt";
 
+// Add lock to prevent concurrent getNextFile calls
+let getNextFileLock = false;
+
 async function fetchFilesList(filesListUrl) {
   try {
     proxyUrl = '';
@@ -163,12 +166,29 @@ async function getPreviousFile() {
 }
 
 async function getNextFile() {
+  // Prevent concurrent calls that can corrupt the index
+  if (getNextFileLock) {
+    customLog('getNextFile already in progress, waiting...');
+    // Wait for current operation to complete
+    while (getNextFileLock) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    // If we waited, we might not need to do anything
+    return getNextFile();
+  }
+
   try {
+    getNextFileLock = true;
+    customLog('Starting getNextFile operation');
+    
     const playedFiles = await getPlayedFiles();
     const currentIndex = await getCurrentIndex();
     const allFiles = await getAllFiles();
 
+    customLog('Current index:', currentIndex, 'Total files:', allFiles.length);
+
     if (currentIndex === allFiles.length - 1) {
+      customLog('Reached end of list, getting random file');
       return getRandomFile();
     }
 
@@ -177,16 +197,21 @@ async function getNextFile() {
 
     if (playedFiles[newIndex]) {
       nextFile = playedFiles[newIndex];
+      customLog('Using cached played file at index:', newIndex);
     } else {
       nextFile = allFiles[newIndex];
       await setPlayedFile(nextFile, newIndex);
+      customLog('Added new file to played list at index:', newIndex);
     }
 
     await setCurrentIndex(newIndex);
+    customLog('Updated current index to:', newIndex);
     return nextFile;
   } catch (error) {
     customError('Error in getNextFile:', error);
     throw error;
+  } finally {
+    getNextFileLock = false;
   }
 }
 

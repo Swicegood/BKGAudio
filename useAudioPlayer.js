@@ -19,6 +19,8 @@ const useAudioPlayer = (onSongLoaded) => {
   const isLoadingNewFile = useRef(false);
   const watchdogIntervalRef = useRef(null);
   const nextTrackUrl = useRef(null);
+  const isPreloading = useRef(false);
+  const lastPreloadCheck = useRef(0);
   const { position, duration } = useProgress();
 
   const ensureAudioSessionActive = async () => {
@@ -123,13 +125,19 @@ const useAudioPlayer = (onSongLoaded) => {
           const currentPosition = await TrackPlayer.getPosition();
           const currentDuration = await TrackPlayer.getDuration();
           
-          // Preload next track when we're 30 seconds from the end
-          if (currentDuration > 30 && currentDuration - currentPosition <= 30) {
-            await preloadNextTrack();
+          // Preload next track when we're 30 seconds from the end (with debouncing)
+          const timeToEnd = currentDuration - currentPosition;
+          if (currentDuration > 30 && timeToEnd <= 30) {
+            const now = Date.now();
+            // Only check for preload once every 5 seconds to prevent rapid-fire calls
+            if (now - lastPreloadCheck.current > 5000) {
+              lastPreloadCheck.current = now;
+              await preloadNextTrack();
+            }
           }
           
           // If we're within 0.5 seconds of the end, transition to next track
-          if (currentDuration > 0 && currentDuration - currentPosition <= 0.5) {
+          if (currentDuration > 0 && timeToEnd <= 0.5) {
             customLog('Track near end, transitioning to next track');
             setIsTrackEnded(true);
             await TrackPlayer.skipToNext();
@@ -369,6 +377,9 @@ const useAudioPlayer = (onSongLoaded) => {
       if (isTestMode) {
         customLog('Test mode enabled, seeking current track to last 31 seconds');
         try {
+          // Reset any track ended state that might be corrupted
+          setIsTrackEnded(false);
+          
           const trackDuration = await TrackPlayer.getDuration();
           if (trackDuration > 31) {
             const seekPosition = trackDuration - 31;
@@ -378,6 +389,13 @@ const useAudioPlayer = (onSongLoaded) => {
         } catch (error) {
           customError('Error seeking in test mode:', error);
         }
+      } else {
+        // When exiting test mode, reset any corrupted state
+        customLog('Test mode disabled, resetting track state');
+        setIsTrackEnded(false);
+        nextTrackUrl.current = null; // Clear preloaded track URL to force fresh preload
+        isPreloading.current = false; // Reset preload lock
+        lastPreloadCheck.current = 0; // Reset preload debounce timer
       }
     };
 
@@ -386,8 +404,17 @@ const useAudioPlayer = (onSongLoaded) => {
 
   // Function to preload the next track
   const preloadNextTrack = async () => {
+    // Prevent concurrent calls to avoid race conditions
+    if (isPreloading.current) {
+      customLog('Preload already in progress, skipping');
+      return;
+    }
+
     try {
       if (!nextTrackUrl.current) {
+        isPreloading.current = true;
+        customLog('Starting preload operation');
+        
         const nextFile = await getNextFile();
         customLog('Preloading next track:', nextFile);
         nextTrackUrl.current = nextFile;
@@ -399,9 +426,13 @@ const useAudioPlayer = (onSongLoaded) => {
           title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
         });
         customLog('Next track preloaded successfully');
+      } else {
+        customLog('Next track already preloaded, skipping');
       }
     } catch (error) {
       customError('Error preloading next track:', error);
+    } finally {
+      isPreloading.current = false;
     }
   };
 
