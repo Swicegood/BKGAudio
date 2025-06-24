@@ -173,8 +173,11 @@ async function getNextFile() {
     while (getNextFileLock) {
       await new Promise(resolve => setTimeout(resolve, 10));
     }
-    // If we waited, we might not need to do anything
-    return getNextFile();
+    // After waiting, try again with the same lock pattern
+    if (getNextFileLock) {
+      customLog('getNextFile still locked after waiting, skipping');
+      return null;
+    }
   }
 
   try {

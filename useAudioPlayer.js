@@ -449,14 +449,14 @@ const useAudioPlayer = (onSongLoaded) => {
 
   // Function to preload the next track
   const preloadNextTrack = async () => {
-    // Prevent concurrent calls to avoid race conditions - use atomic check-and-set
-    const wasAlreadyPreloading = isPreloading.current;
-    isPreloading.current = true;
-    
-    if (wasAlreadyPreloading) {
+    // Implement proper mutex pattern to prevent race conditions
+    if (isPreloading.current) {
       customLog('Preload already in progress, skipping');
       return;
     }
+    
+    // Set lock immediately to prevent other calls from proceeding
+    isPreloading.current = true;
 
     try {
       if (!nextTrackUrl.current) {
