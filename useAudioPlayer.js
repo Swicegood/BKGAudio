@@ -18,10 +18,12 @@ const useAudioPlayer = (onSongLoaded) => {
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const isLoadingNewFile = useRef(false);
   const watchdogIntervalRef = useRef(null);
+  const progressIntervalRef = useRef(null);
   const nextTrackUrl = useRef(null);
   const isPreloading = useRef(false);
   const lastPreloadCheck = useRef(0);
   const lastTestModeSeek = useRef({});
+  const isTransitioning = useRef(false);
   const { position, duration } = useProgress();
 
   const ensureAudioSessionActive = async () => {
@@ -135,6 +137,16 @@ const useAudioPlayer = (onSongLoaded) => {
 
   // Progress monitoring with preloading logic
   useEffect(() => {
+    // Clean up any existing progress interval first
+    if (progressIntervalRef.current) {
+      customLog('Cleaning up existing progress interval before starting new one');
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    
+    const intervalId = Math.random(); // Unique ID for this interval
+    customLog('Starting progress monitoring interval with ID:', intervalId);
+    
     const checkProgress = async () => {
       if (isPlaying) {
         try {
@@ -148,14 +160,23 @@ const useAudioPlayer = (onSongLoaded) => {
             // Only check for preload once every 500ms to prevent rapid-fire calls while staying fast
             if (now - lastPreloadCheck.current > 500) {
               lastPreloadCheck.current = now;
+              customLog('Progress monitor triggering preload (interval ID:', intervalId + ')');
               await preloadNextTrack();
             }
           }
           
           // If we're within 1 second of the end, transition to next track (increased from 0.5 for faster transition)
           if (currentDuration > 0 && timeToEnd <= 1.0) {
+            // Prevent duplicate transitions
+            if (isTransitioning.current) {
+              customLog('Track transition already in progress, skipping');
+              return;
+            }
+            
+            isTransitioning.current = true;
             customLog('Track near end, transitioning to next track');
             setIsTrackEnded(true);
+            
             // Ensure immediate transition with no gaps
             try {
               await TrackPlayer.skipToNext();
@@ -163,6 +184,11 @@ const useAudioPlayer = (onSongLoaded) => {
               customLog('Track transition completed');
             } catch (error) {
               customError('Error in track transition:', error);
+            } finally {
+              // Reset transition flag after a short delay to allow the transition to complete
+              setTimeout(() => {
+                isTransitioning.current = false;
+              }, 1000);
             }
           }
         } catch (error) {
@@ -171,8 +197,15 @@ const useAudioPlayer = (onSongLoaded) => {
       }
     };
 
-    const progressInterval = setInterval(checkProgress, 100);
-    return () => clearInterval(progressInterval);
+    progressIntervalRef.current = setInterval(checkProgress, 100);
+    
+    return () => {
+      customLog('Cleaning up progress monitoring interval with ID:', intervalId);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    };
   }, [isPlaying]);
 
   const loadRandomFile = async () => {
@@ -438,7 +471,8 @@ const useAudioPlayer = (onSongLoaded) => {
         customLog('Test mode disabled, resetting track state');
         setIsTrackEnded(false);
         nextTrackUrl.current = null; // Clear preloaded track URL to force fresh preload
-        isPreloading.current = false; // Reset preload lock
+        isPreloading.current = false; // Reset preload lock to boolean false
+        isTransitioning.current = false; // Reset transition lock
         lastPreloadCheck.current = 0; // Reset preload debounce timer
         lastTestModeSeek.current = {}; // Clear test mode seek history
       }
@@ -449,18 +483,32 @@ const useAudioPlayer = (onSongLoaded) => {
 
   // Function to preload the next track
   const preloadNextTrack = async () => {
-    // Implement proper mutex pattern to prevent race conditions
+    // Use a more robust mutex pattern - check and set atomically using a temporary variable
     if (isPreloading.current) {
       customLog('Preload already in progress, skipping');
       return;
     }
     
-    // Set lock immediately to prevent other calls from proceeding
-    isPreloading.current = true;
+    // Atomic check-and-set using a promise to ensure only one operation proceeds
+    const preloadId = Date.now() + Math.random(); // Unique ID for this preload attempt
+    
+    // Double-check pattern with unique ID logging
+    if (isPreloading.current) {
+      customLog('Preload already in progress after double-check, skipping');
+      return;
+    }
+    
+    isPreloading.current = preloadId; // Set to unique ID instead of boolean
+    
+    // Verify we actually got the lock
+    if (isPreloading.current !== preloadId) {
+      customLog('Failed to acquire preload lock, another operation took it');
+      return;
+    }
 
     try {
       if (!nextTrackUrl.current) {
-        customLog('Starting preload operation');
+        customLog('Starting preload operation with ID:', preloadId);
         
         const nextFile = await getNextFile();
         customLog('Preloading next track:', nextFile);
@@ -479,7 +527,10 @@ const useAudioPlayer = (onSongLoaded) => {
     } catch (error) {
       customError('Error preloading next track:', error);
     } finally {
-      isPreloading.current = false;
+      // Only clear the lock if we still own it
+      if (isPreloading.current === preloadId) {
+        isPreloading.current = false;
+      }
     }
   };
 

@@ -169,14 +169,16 @@ async function getNextFile() {
   // Prevent concurrent calls that can corrupt the index
   if (getNextFileLock) {
     customLog('getNextFile already in progress, waiting...');
-    // Wait for current operation to complete
-    while (getNextFileLock) {
-      await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for current operation to complete with timeout
+    let waitTime = 0;
+    while (getNextFileLock && waitTime < 5000) { // 5 second timeout
+      await new Promise(resolve => setTimeout(resolve, 50));
+      waitTime += 50;
     }
-    // After waiting, try again with the same lock pattern
+    // After waiting, check if still locked
     if (getNextFileLock) {
-      customLog('getNextFile still locked after waiting, skipping');
-      return null;
+      customLog('getNextFile still locked after waiting, operation may be stuck');
+      getNextFileLock = false; // Force unlock to prevent permanent deadlock
     }
   }
 
