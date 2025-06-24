@@ -61,10 +61,9 @@ module.exports = async function () {
     TrackPlayer.skipToPrevious();
   });
 
-  const playWithRetry = async (retries = 5) => {
+  const playWithRetry = async (retries = 3) => {
     for (let i = 0; i < retries; i++) {
       try {
-        await TrackPlayer.stop();
         await TrackPlayer.play();
         const state = await TrackPlayer.getState();
         customLog(`Attempt ${i + 1}: PlaybackState after play:`, state);
@@ -72,7 +71,7 @@ module.exports = async function () {
           customLog('Successfully started playback');
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 1 second before retry
+        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         customError(`Attempt ${i + 1} failed:`, error);
       }
@@ -93,25 +92,22 @@ module.exports = async function () {
         url: nextFile,
         title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
       });
-      const playerState = await TrackPlayer.getState();
-      customLog('Player state before play:', playerState);
+      
       const queue = await TrackPlayer.getQueue();
-      console.log('Current queue:', queue);
+      customLog('Current queue length:', queue.length);
       if (queue.length === 0) {
         customError('No tracks in queue');
         return;
       }
-      await new Promise(resolve => setTimeout(resolve, 100));
-      customLog('Trying to request audio focus');
+      
+      // Minimize delay for background processing
+      customLog('Requesting audio focus and starting playback immediately');
       const focusGranted = await requestAudioFocus();
       if (focusGranted) {
-        customLog('Trying to play next file');
         await playWithRetry();
       } else {
         customError('Failed to get audio focus');
       }
-      customLog('Setting rate to 1.0');
-      await TrackPlayer.setRate(1.0);
     } catch (error) {
       customError('Error in PlaybackQueueEnded event:', error);
     }

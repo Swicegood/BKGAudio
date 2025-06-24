@@ -145,19 +145,25 @@ const useAudioPlayer = (onSongLoaded) => {
           const timeToEnd = currentDuration - currentPosition;
           if (currentDuration > 30 && timeToEnd <= 30) {
             const now = Date.now();
-            // Only check for preload once every 5 seconds to prevent rapid-fire calls
-            if (now - lastPreloadCheck.current > 5000) {
+            // Only check for preload once every 500ms to prevent rapid-fire calls while staying fast
+            if (now - lastPreloadCheck.current > 500) {
               lastPreloadCheck.current = now;
               await preloadNextTrack();
             }
           }
           
-          // If we're within 0.5 seconds of the end, transition to next track
-          if (currentDuration > 0 && timeToEnd <= 0.5) {
+          // If we're within 1 second of the end, transition to next track (increased from 0.5 for faster transition)
+          if (currentDuration > 0 && timeToEnd <= 1.0) {
             customLog('Track near end, transitioning to next track');
             setIsTrackEnded(true);
-            await TrackPlayer.skipToNext();
-            await TrackPlayer.play();
+            // Ensure immediate transition with no gaps
+            try {
+              await TrackPlayer.skipToNext();
+              await TrackPlayer.play();
+              customLog('Track transition completed');
+            } catch (error) {
+              customError('Error in track transition:', error);
+            }
           }
         } catch (error) {
           customError('Error checking progress:', error);
