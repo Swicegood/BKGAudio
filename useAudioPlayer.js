@@ -319,32 +319,61 @@ const useAudioPlayer = (onSongLoaded) => {
   const debouncedLoadPreviousFile = useRef(debounce(async () => {
     customLog('Loading previous file...');
     
-    // Debug: Check current state before calling getPreviousFile
-    const currentIndex = await getCurrentHistoryIndex();
-    const history = await getPlayedHistory();
-    customLog('DEBUG: Before getPreviousFile - Current index:', currentIndex, 'History length:', history.length);
+    // Set manual navigation flag to prevent service interference
+    if (global.setManualNavigation) {
+      global.setManualNavigation(true);
+    }
     
-    const previousFile = await getPreviousFile();
-    customLog('DEBUG: getPreviousFile returned:', previousFile);
-    
-    if (previousFile !== null && previousFile !== 0) {
-      customLog('Loading previous file:', previousFile);
-      await loadFile(previousFile);
-      await updateHistoryState();
-    } else {
-      customLog('No previous file available - previousFile was:', previousFile);
-      // Debug: Check state after failed getPreviousFile
-      const newIndex = await getCurrentHistoryIndex();
-      const newHistory = await getPlayedHistory();
-      customLog('DEBUG: After failed getPreviousFile - Current index:', newIndex, 'History length:', newHistory.length);
+    try {
+      // Debug: Check current state before calling getPreviousFile
+      const currentIndex = await getCurrentHistoryIndex();
+      const history = await getPlayedHistory();
+      customLog('DEBUG: Before getPreviousFile - Current index:', currentIndex, 'History length:', history.length);
+      
+      const previousFile = await getPreviousFile();
+      customLog('DEBUG: getPreviousFile returned:', previousFile);
+      
+      if (previousFile !== null && previousFile !== 0) {
+        customLog('Loading previous file:', previousFile);
+        await loadFile(previousFile);
+        await updateHistoryState();
+      } else {
+        customLog('No previous file available - previousFile was:', previousFile);
+        // Debug: Check state after failed getPreviousFile
+        const newIndex = await getCurrentHistoryIndex();
+        const newHistory = await getPlayedHistory();
+        customLog('DEBUG: After failed getPreviousFile - Current index:', newIndex, 'History length:', newHistory.length);
+      }
+    } finally {
+      // Clear manual navigation flag after a delay
+      setTimeout(() => {
+        if (global.setManualNavigation) {
+          global.setManualNavigation(false);
+        }
+      }, 2000);
     }
   }, 1000)).current;
 
   const debouncedLoadNextFile = useRef(debounce(async () => {
     customLog('Loading next file...');
-    const nextFile = await getNextFile();
-    await loadFile(nextFile);
-    await updateHistoryState();
+    
+    // Set manual navigation flag to prevent service interference
+    if (global.setManualNavigation) {
+      global.setManualNavigation(true);
+    }
+    
+    try {
+      const nextFile = await getNextFile();
+      await loadFile(nextFile);
+      await updateHistoryState();
+    } finally {
+      // Clear manual navigation flag after a delay
+      setTimeout(() => {
+        if (global.setManualNavigation) {
+          global.setManualNavigation(false);
+        }
+      }, 2000);
+    }
   }, 1000)).current;
 
   const togglePlayback = async () => {

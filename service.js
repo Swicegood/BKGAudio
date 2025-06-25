@@ -3,6 +3,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { customLog, customError } from './customLogger';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 
+// Global flag to prevent service interference during manual navigation
+let isManualNavigation = false;
+
+// Function to set manual navigation flag (will be called from main app)
+global.setManualNavigation = (value) => {
+  isManualNavigation = value;
+  customLog('Manual navigation flag set to:', value);
+};
+
 const requestAudioFocus = async () => {
     try {
       await Audio.setAudioModeAsync({
@@ -123,7 +132,12 @@ module.exports = async function () {
       customLog('Playback stopped, checking if queue is empty');
       const queue = await TrackPlayer.getQueue();
       if (queue.length === 0) {
-        customLog('Queue is empty, fetching next file');
+        if (isManualNavigation) {
+          customLog('Manual navigation in progress, skipping auto-continuation');
+          return;
+        }
+        
+        customLog('Queue is empty, fetching next file (natural track ending)');
         const { getNextFile } = require('./apiWrapper');
         const nextFile = await getNextFile();
         customLog('Next file to play:', nextFile);
