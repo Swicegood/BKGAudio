@@ -90,4 +90,17 @@ export default StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Satoshi-Regular',
   },
+  debugToggle: {
+    backgroundColor: '#2196F3',
+    padding: 8,
+    borderRadius: 5,
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  debugToggleText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
 });

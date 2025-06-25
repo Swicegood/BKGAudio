@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import StorageManager from './StorageManager';
 import TrackPlayer, { State, Event, useTrackPlayerEvents, useProgress } from 'react-native-track-player';
-import { getAllFiles, getRandomFile, getPreviousFile, getNextFile } from './apiWrapper';
+import { getAllFiles, getRandomFile, getPreviousFile, getNextFile, getPlayedHistory, getCurrentHistoryIndex, migrateToNewSystem } from './apiWrapper';
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
 import { InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
@@ -14,6 +14,10 @@ const useAudioPlayer = (onSongLoaded) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isTestMode, setIsTestMode] = useState(false);
   const [isTrackEnded, setIsTrackEnded] = useState(false);
+  // New history system state
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [historyLength, setHistoryLength] = useState(0);
+  const [migrationComplete, setMigrationComplete] = useState(false);
   const hasAutoPlayedOnce = useRef(false);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -26,6 +30,30 @@ const useAudioPlayer = (onSongLoaded) => {
   const lastTestModeSeek = useRef({});
   const isTransitioning = useRef(false);
   const { position, duration } = useProgress();
+
+  // Function to update history state for UI debugging
+  const updateHistoryState = async () => {
+    try {
+      const currentIndex = await getCurrentHistoryIndex();
+      const history = await getPlayedHistory();
+      setHistoryIndex(currentIndex);
+      setHistoryLength(history.length);
+      
+      customLog('History state updated - Index:', currentIndex, 'Length:', history.length);
+      
+      // Debug info for development
+      if (history.length > 0 && currentIndex >= 0) {
+        const currentTrack = history[currentIndex];
+        const isAtLeadingEdge = currentIndex === history.length - 1;
+        customLog('Current track in history:', currentTrack?.split('/').pop());
+        customLog('At leading edge:', isAtLeadingEdge);
+        customLog('Can go previous:', currentIndex > 0);
+        customLog('Can go next (in history):', currentIndex < history.length - 1);
+      }
+    } catch (error) {
+      customError('Error updating history state:', error);
+    }
+  };
 
   const ensureAudioSessionActive = async () => {
     try {
@@ -221,6 +249,9 @@ const useAudioPlayer = (onSongLoaded) => {
         onSongLoaded(true);
         customLog('onSongLoaded(true) called');
         
+        // Update history state after loading random file
+        await updateHistoryState();
+        
         // Only auto-play on the very first load
         if (!hasAutoPlayedOnce.current) {
           await TrackPlayer.play();
@@ -286,15 +317,21 @@ const useAudioPlayer = (onSongLoaded) => {
   };
 
   const debouncedLoadPreviousFile = useRef(debounce(async () => {
+    customLog('Loading previous file...');
     const previousFile = await getPreviousFile();
-    if (previousFile !== 0) {
+    if (previousFile !== null && previousFile !== 0) {
       await loadFile(previousFile);
+      await updateHistoryState();
+    } else {
+      customLog('No previous file available');
     }
   }, 1000)).current;
 
   const debouncedLoadNextFile = useRef(debounce(async () => {
+    customLog('Loading next file...');
     const nextFile = await getNextFile();
     await loadFile(nextFile);
+    await updateHistoryState();
   }, 1000)).current;
 
   const togglePlayback = async () => {
@@ -372,6 +409,16 @@ const useAudioPlayer = (onSongLoaded) => {
   useEffect(() => {
     const loadLastSong = async () => {
       try {
+        customLog('Starting initial load with migration...');
+        
+        // First, ensure migration is complete
+        await migrateToNewSystem();
+        setMigrationComplete(true);
+        customLog('Migration completed');
+        
+        // Update history state
+        await updateHistoryState();
+        
         customLog('Starting to load last song');
         const lastSongUrl = await StorageManager.getItem('lastSongUrl');
         customLog('Starting to load last song position');
@@ -390,11 +437,20 @@ const useAudioPlayer = (onSongLoaded) => {
           customLog('No last song URL found, loading random file');
           await loadRandomFile();
         }
+        
+        // Update history state after loading
+        await updateHistoryState();
         setIsFirstLoad(false);
         customLog('Initial load completed');
       } catch (error) {
         customError('Failed to load the last song and position:', error);
-        await loadRandomFile();
+        try {
+          await loadRandomFile();
+          await updateHistoryState();
+        } catch (fallbackError) {
+          customError('Fallback load also failed:', fallbackError);
+        }
+        setIsFirstLoad(false);
       }
     };
   
@@ -556,7 +612,12 @@ const useAudioPlayer = (onSongLoaded) => {
     seekForward,
     loadPreviousFile: debouncedLoadPreviousFile,
     loadNextFile: debouncedLoadNextFile,
-    saveCurrentState
+    saveCurrentState,
+    // New history system data for debugging
+    historyIndex,
+    historyLength,
+    migrationComplete,
+    updateHistoryState
   };
 };
 
