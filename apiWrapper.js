@@ -241,16 +241,20 @@ async function getPreviousFile() {
     await migrateToNewSystem();
     
     const currentIndex = await getCurrentHistoryIndex();
+    const history = await getPlayedHistory();
+    
+    customLog('DEBUG getPreviousFile: currentIndex:', currentIndex, 'historyLength:', history.length);
     
     if (currentIndex <= 0) {
-      customLog('No previous track available');
+      customLog('No previous track available - currentIndex <= 0');
       return null;
     }
     
     const newIndex = currentIndex - 1;
+    customLog('DEBUG getPreviousFile: newIndex will be:', newIndex);
+    
     await setCurrentHistoryIndex(newIndex);
     
-    const history = await getPlayedHistory();
     const previousTrack = history[newIndex];
     
     customLog('Moving back in history to index:', newIndex, 'Track:', previousTrack);
