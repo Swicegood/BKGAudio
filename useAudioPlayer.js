@@ -393,6 +393,30 @@ const useAudioPlayer = (onSongLoaded) => {
     await TrackPlayer.seekBy(30);
   };
 
+  const seekTo = async (positionInSeconds) => {
+    try {
+      customLog('useAudioPlayer: seekTo called with position:', positionInSeconds);
+      const currentPosition = await TrackPlayer.getProgress();
+      customLog('useAudioPlayer: Current position before seek:', currentPosition.position);
+      
+      await TrackPlayer.seekTo(positionInSeconds);
+      customLog('useAudioPlayer: Seek operation completed successfully');
+      
+      // Verify the seek worked by checking position after a brief delay
+      setTimeout(async () => {
+        try {
+          const newPosition = await TrackPlayer.getProgress();
+          customLog('useAudioPlayer: Position after seek:', newPosition.position, 'Target was:', positionInSeconds);
+        } catch (error) {
+          customError('useAudioPlayer: Error checking position after seek:', error);
+        }
+      }, 100);
+      
+    } catch (error) {
+      customError('useAudioPlayer: Error seeking to position:', positionInSeconds, error);
+    }
+  };
+
   const saveCurrentState = async () => {
     try {
       const currentProgress = await TrackPlayer.getProgress();
@@ -652,6 +676,7 @@ const useAudioPlayer = (onSongLoaded) => {
     togglePlayback,
     seekBackward,
     seekForward,
+    seekTo,
     loadPreviousFile: debouncedLoadPreviousFile,
     loadNextFile: debouncedLoadNextFile,
     saveCurrentState,

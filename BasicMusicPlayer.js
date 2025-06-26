@@ -17,6 +17,7 @@ const BasicMusicPlayer = ({ audioPlayerData, onSongLoaded }) => {
     togglePlayback,
     seekBackward,
     seekForward,
+    seekTo,
     loadPreviousFile,
     loadNextFile,
     // New history system data (still available for DebugScreen if needed)
@@ -37,7 +38,7 @@ const BasicMusicPlayer = ({ audioPlayerData, onSongLoaded }) => {
   return (
     <View style={styles.musicContainer}>
       <SongTitle title={songTitle || 'Loading...'} />
-      <ProgressBar duration={duration} position={position} />
+      <ProgressBar duration={duration} position={position} onSeek={seekTo} />
       <AudioControls
         isPlaying={isPlaying}
         onTogglePlayback={togglePlayback}
