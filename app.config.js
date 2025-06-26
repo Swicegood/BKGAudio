@@ -21,7 +21,7 @@ module.exports = ({ config }) => {
       infoPlist: {
         UIBackgroundModes: ["audio", "background-fetch"]
       },
-      buildNumber: "18",
+      buildNumber: "19",
       config: {
         usesSwift: true,
         swiftVersion: "5.0"
