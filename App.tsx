@@ -93,6 +93,7 @@ const App: React.FC = () => {
           onClose={() => setShowDebugScreen(false)} 
           isTestMode={audioPlayerData.isTestMode}
           toggleTestMode={audioPlayerData.toggleTestMode}
+          audioPlayerData={audioPlayerData}
         />
       ) : (
         <>
