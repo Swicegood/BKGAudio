@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   header: {
     fontSize: 24,
@@ -149,9 +149,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     backgroundColor: '#C68446',
     width: '100%',
-    height: 40,
     textAlign: 'center',
     fontFamily: 'Satoshi-Bold',
+    textAlignVertical: 'center',
   },
   text: {
     fontSize: 24,
