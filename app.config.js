@@ -19,7 +19,7 @@ module.exports = ({ config }) => {
       bundleIdentifier: isDebug ? "com.iskcon.bkgaudio.debug" : "com.iskcon.bkgaudio",
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: ["audio", "background-fetch"]
+        UIBackgroundModes: ["audio", "fetch"]
       },
       buildNumber: "19",
       config: {
