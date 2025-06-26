@@ -4,7 +4,7 @@ module.exports = ({ config }) => {
   return {
     name: isDebug ? "BKGAudio (Debug)" : "BKGAudio",
     slug: "bkgaudio",
-    version: "1.4.2",
+    version: "2.0.0",
     platforms: ["ios", "android"],
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -19,9 +19,9 @@ module.exports = ({ config }) => {
       bundleIdentifier: isDebug ? "com.iskcon.bkgaudio.debug" : "com.iskcon.bkgaudio",
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: ["audio", "fetch", "background-processing"]
+        UIBackgroundModes: ["audio", "background-fetch"]
       },
-      buildNumber: "17",
+      buildNumber: "18",
       config: {
         usesSwift: true,
         swiftVersion: "5.0"
