@@ -367,6 +367,10 @@ const useAudioPlayer = (onSongLoaded) => {
         customLog('Loading previous file:', previousFile);
         await loadFile(previousFile);
         await updateHistoryState();
+        
+        // Auto-play the previous track after loading
+        customLog('Auto-playing previous track from in-app navigation');
+        await TrackPlayer.play();
       } else {
         customLog('No previous file available - previousFile was:', previousFile);
         // Debug: Check state after failed getPreviousFile
@@ -396,6 +400,10 @@ const useAudioPlayer = (onSongLoaded) => {
       const nextFile = await getNextFile();
       await loadFile(nextFile);
       await updateHistoryState();
+      
+      // Auto-play the next track after loading
+      customLog('Auto-playing next track from in-app navigation');
+      await TrackPlayer.play();
     } finally {
       // Clear manual navigation flag after a delay
       setTimeout(() => {
