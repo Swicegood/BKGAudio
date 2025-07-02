@@ -60,14 +60,59 @@ module.exports = async function () {
     }
   });
 
-  TrackPlayer.addEventListener(Event.RemoteNext, () => {
+  TrackPlayer.addEventListener(Event.RemoteNext, async () => {
     customLog('RemoteNext event received');
-    TrackPlayer.skipToNext();
+    try {
+      const { getNextFile } = require('./apiWrapper');
+      const nextFile = await getNextFile();
+      customLog('Loading next file from lockscreen:', nextFile);
+      
+      await TrackPlayer.reset();
+      await TrackPlayer.add({
+        id: '1',
+        url: nextFile,
+        title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
+      });
+      
+      const focusGranted = await requestAudioFocus();
+      if (focusGranted) {
+        await playWithRetry();
+      } else {
+        customError('Failed to get audio focus for next track');
+      }
+    } catch (error) {
+      customError('Error in RemoteNext event:', error);
+    }
   });
 
-  TrackPlayer.addEventListener(Event.RemotePrevious, () => {
+  TrackPlayer.addEventListener(Event.RemotePrevious, async () => {
     customLog('RemotePrevious event received');
-    TrackPlayer.skipToPrevious();
+    try {
+      const { getPreviousFile } = require('./apiWrapper');
+      const previousFile = await getPreviousFile();
+      
+      if (previousFile !== null && previousFile !== 0) {
+        customLog('Loading previous file from lockscreen:', previousFile);
+        
+        await TrackPlayer.reset();
+        await TrackPlayer.add({
+          id: '1',
+          url: previousFile,
+          title: previousFile.split('/').pop().replace(/\.mp3$/, ''),
+        });
+        
+        const focusGranted = await requestAudioFocus();
+        if (focusGranted) {
+          await playWithRetry();
+        } else {
+          customError('Failed to get audio focus for previous track');
+        }
+      } else {
+        customLog('No previous file available from lockscreen');
+      }
+    } catch (error) {
+      customError('Error in RemotePrevious event:', error);
+    }
   });
 
   const playWithRetry = async (retries = 3) => {
