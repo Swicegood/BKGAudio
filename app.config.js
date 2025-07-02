@@ -4,7 +4,7 @@ module.exports = ({ config }) => {
   return {
     name: isDebug ? "BKGAudio (Debug)" : "BKGAudio",
     slug: "bkgaudio",
-    version: "2.0.0",
+    version: "2.1.0",
     platforms: ["ios", "android"],
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -21,7 +21,7 @@ module.exports = ({ config }) => {
       infoPlist: {
         UIBackgroundModes: ["audio", "fetch"]
       },
-      buildNumber: "20",
+      buildNumber: "21",
       config: {
         usesSwift: true,
         swiftVersion: "5.0"
