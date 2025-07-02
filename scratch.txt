@@ -1,0 +1,372 @@
+default	16:38:49.475579-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:49.476217-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:49.476300-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:49.475537-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:49.476174-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:49.476259-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:49.492119-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:49.492043-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:49.492099-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:49.475558-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:49.476196-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:49.476279-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:49.492077-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:50.962768-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:38:50.962856-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.962939-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.963030-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.962790-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:38:50.962876-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.962965-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.963051-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.962811-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:38:50.962896-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.962986-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.963069-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.977149-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.962745-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:38:50.962835-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.962918-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.963009-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.977171-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.977207-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.977101-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.995508-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.995554-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.995353-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.997143-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.997231-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.997314-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:50.997165-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.997251-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.997334-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:50.997123-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.997210-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.997294-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:50.995584-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:38:50.997186-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:38:50.997272-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:38:50.997354-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 0; ignoreInteractionEvents: 0, systemGestureStateChange: 1
+default	16:38:52.926275-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: sending to MediaRemote
+default	16:38:52.926295-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: sending to MediaRemote
+default	16:38:52.926316-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: sending to MediaRemote
+default	16:38:52.926254-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: sending to MediaRemote
+default	16:38:52.937724-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo with mergePolicy Replace: <private>
+default	16:38:52.938158-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo artwork: (null)
+default	16:38:52.938803-0400	BKGAudioDebug	PlaybackQueueInvalidation: NowPlayingItem for origin-iPhone-1280262988/client-com.iskcon.bkgaudio.debug-1769/player-MediaRemote-DefaultPlayer changed from
+ <private>
+ -> 
+<private>
+default	16:38:52.939431-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: finished
+default	16:38:52.937762-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo with mergePolicy Replace: <private>
+default	16:38:52.938199-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo artwork: (null)
+default	16:38:52.937743-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo with mergePolicy Replace: <private>
+default	16:38:52.938179-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo artwork: (null)
+default	16:38:52.938826-0400	BKGAudioDebug	PlaybackQueueInvalidation: NowPlayingItem for origin-iPhone-1280262988/client-com.iskcon.bkgaudio.debug-1769/player-MediaRemote-DefaultPlayer changed from
+ <private>
+ -> 
+<private>
+default	16:38:52.939452-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: finished
+default	16:38:52.938847-0400	BKGAudioDebug	PlaybackQueueInvalidation: NowPlayingItem for origin-iPhone-1280262988/client-com.iskcon.bkgaudio.debug-1769/player-MediaRemote-DefaultPlayer changed from
+ <private>
+ -> 
+<private>
+default	16:38:52.937704-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo with mergePolicy Replace: <private>
+default	16:38:52.939472-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: finished
+default	16:38:52.938138-0400	BKGAudioDebug	[NowPlayingInfo] Setting nowPlayingInfo artwork: (null)
+default	16:38:52.938774-0400	BKGAudioDebug	PlaybackQueueInvalidation: NowPlayingItem for origin-iPhone-1280262988/client-com.iskcon.bkgaudio.debug-1769/player-MediaRemote-DefaultPlayer changed from
+ <private>
+ -> 
+<private>
+default	16:38:52.939409-0400	BKGAudioDebug	NPIC: setNowPlayingInfo: finished
+default	16:39:07.589996-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer replaceCurrentItemWithPlayerItem:]: currentItem KVO: P/GB called with (null)
+default	16:39:07.590250-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer replaceCurrentItemWithPlayerItem:]: currentItem KVO: P/GB called with (null)
+default	16:39:07.590811-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer replaceCurrentItemWithPlayerItem:]: currentItem KVO: P/GB called with (null)
+default	16:39:07.590581-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer replaceCurrentItemWithPlayerItem:]: currentItem KVO: P/GB called with (null)
+default	16:39:07.591099-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke_2: currentItem KVO: P/GB will willChange AVPlayer.currentItem
+default	16:39:07.591347-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke_2: currentItem KVO: P/GB will willChange AVPlayer.currentItem
+default	16:39:07.591828-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke_2: currentItem KVO: P/GB will willChange AVPlayer.currentItem
+default	16:39:07.591985-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke_2: currentItem KVO: P/GB will willChange AVPlayer.currentItem
+default	16:39:07.592479-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did willChange AVPlayer.currentItem
+default	16:39:07.594221-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did willChange AVPlayer.currentItem
+default	16:39:07.598045-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did willChange AVPlayer.currentItem
+default	16:39:07.598155-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did willChange AVPlayer.currentItem
+default	16:39:07.599136-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setCurrentItem:]: currentItem KVO: P/GB updating current item from I/VWO.01 to (null)
+default	16:39:07.600244-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setCurrentItem:]: currentItem KVO: P/GB updating current item from I/VWO.01 to (null)
+default	16:39:07.601133-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setCurrentItem:]: currentItem KVO: P/GB updating current item from I/VWO.01 to (null)
+default	16:39:07.602037-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setCurrentItem:]: currentItem KVO: P/GB updating current item from I/VWO.01 to (null)
+default	16:39:07.602180-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.602224-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.602125-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.602273-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.602459-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB will didChange AVPlayer.currentItem
+default	16:39:07.602559-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did didChange AVPlayer.currentItem
+default	16:39:07.602308-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB will didChange AVPlayer.currentItem
+default	16:39:07.602332-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB will didChange AVPlayer.currentItem
+default	16:39:07.602426-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB will didChange AVPlayer.currentItem
+default	16:39:07.602487-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did didChange AVPlayer.currentItem
+default	16:39:07.602509-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did didChange AVPlayer.currentItem
+default	16:39:07.602533-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _runOnIvarAccessQueueOperationThatMayChangeCurrentItemWithPreflightBlock:modificationBlock:error:]_block_invoke: currentItem KVO: P/GB did didChange AVPlayer.currentItem
+default	16:39:07.603158-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603081-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603188-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603106-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603212-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603296-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603127-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.603241-0400	BKGAudioDebug	<<<< AVPlayer >>>> -[AVPlayer _setRate:rateChangeReason:figPlayerSetRateHandler:]_block_invoke: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.738006-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.737970-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.738801-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.738029-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.738843-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.737915-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=1, reasonForWaitingToPlay=AVPlayerWaitingWithNoItemToPlayReason
+default	16:39:07.738779-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.738822-0400	BKGAudioDebug	<<<< AVPlayer >>>> avplayer_fpNotificationCallback_block_invoke_14: P/GB setting timeControlStatus=0, reasonForWaitingToPlay=(null)
+default	16:39:07.846060-0400	BKGAudioDebug	Received state update for 1769 (app<com.iskcon.bkgaudio.debug(E69E62C1-69DC-4C4A-A2CE-F547C890B3B3)>, unknown-NotVisible
+default	16:39:07.846008-0400	BKGAudioDebug	Received state update for 1769 (app<com.iskcon.bkgaudio.debug(E69E62C1-69DC-4C4A-A2CE-F547C890B3B3)>, unknown-NotVisible
+default	16:39:07.845987-0400	BKGAudioDebug	Received state update for 1769 (app<com.iskcon.bkgaudio.debug(E69E62C1-69DC-4C4A-A2CE-F547C890B3B3)>, unknown-NotVisible
+default	16:39:07.846038-0400	BKGAudioDebug	Received state update for 1769 (app<com.iskcon.bkgaudio.debug(E69E62C1-69DC-4C4A-A2CE-F547C890B3B3)>, unknown-NotVisible
+default	16:39:23.701812-0400	BKGAudioDebug	Received configuration update from daemon (initial)
+default	16:39:23.701750-0400	BKGAudioDebug	Received configuration update from daemon (initial)
+default	16:39:23.701837-0400	BKGAudioDebug	Received configuration update from daemon (initial)
+default	16:39:23.701787-0400	BKGAudioDebug	Received configuration update from daemon (initial)
+default	16:39:39.964015-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:39:39.964378-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.964468-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.964565-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.964087-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:39:39.964442-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.964541-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.964627-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.964065-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:39:39.964421-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.964519-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.964607-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.964040-0400	BKGAudioDebug	TX focusApplication (peekAppEvent) stealKB:Y scene:com.iskcon.bkgaudio.debug-default
+default	16:39:39.964401-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.964498-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.964586-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.985721-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.985807-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.985898-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.985784-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.985873-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.985960-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.985764-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.985852-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.985939-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:39.985743-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:39.985831-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:39.985918-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.014544-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.014627-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.014712-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.014565-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.014585-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.014605-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.014648-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.014668-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.014689-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.014731-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.014751-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.014771-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.049810-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:40.049787-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:40.049854-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:40.050735-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.049833-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:40.050715-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.050817-0400	BKGAudioDebug	Deactivation reason added: 0; deactivation reasons: 0 -> 1; animating application lifecycle event: 1
+default	16:39:40.050796-0400	BKGAudioDebug	Deactivation reason added: 0; deactivation reasons: 0 -> 1; animating application lifecycle event: 1
+default	16:39:40.050776-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.050857-0400	BKGAudioDebug	Deactivation reason added: 0; deactivation reasons: 0 -> 1; animating application lifecycle event: 1
+default	16:39:40.050755-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.050837-0400	BKGAudioDebug	Deactivation reason added: 0; deactivation reasons: 0 -> 1; animating application lifecycle event: 1
+default	16:39:40.052918-0400	BKGAudioDebug	Deactivation reason added: 12; deactivation reasons: 1 -> 4097; animating application lifecycle event: 1
+default	16:39:40.052896-0400	BKGAudioDebug	Deactivation reason added: 12; deactivation reasons: 1 -> 4097; animating application lifecycle event: 1
+default	16:39:40.053906-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.053993-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.053929-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.054167-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.054014-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.054188-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.053055-0400	BKGAudioDebug	Deactivation reason added: 12; deactivation reasons: 1 -> 4097; animating application lifecycle event: 1
+default	16:39:40.053030-0400	BKGAudioDebug	Deactivation reason added: 12; deactivation reasons: 1 -> 4097; animating application lifecycle event: 1
+default	16:39:40.053972-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.054059-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.054229-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.053951-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.054034-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.054209-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080569-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.080656-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.080738-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080820-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.081079-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.081341-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080549-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.080631-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.080590-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.080677-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.080759-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080841-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.081099-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.081362-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080609-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.080697-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.080779-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080859-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.081120-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.080718-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.080800-0400	BKGAudioDebug	Evaluating dispatch of UIEvent: 0x11d728e00; type: 0; subtype: 0; backing type: 11; shouldSend: 1; ignoreInteractionEvents: 0, systemGestureStateChange: 0
+default	16:39:40.081382-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.081058-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to windows: 1
+default	16:39:40.081321-0400	BKGAudioDebug	Sending UIEvent type: 0; subtype: 0; to window: <UIWindow: 0x101625b80>; contextId: 0x359C1E54
+default	16:39:40.651810-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.652231-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4097 -> 4129; animating application lifecycle event: 1
+default	16:39:40.652648-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.652843-0400	BKGAudioDebug	Deactivation reason removed: 0; deactivation reasons: 4129 -> 4128; animating application lifecycle event: 1
+default	16:39:40.651829-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.652252-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4097 -> 4129; animating application lifecycle event: 1
+default	16:39:40.652688-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.652868-0400	BKGAudioDebug	Deactivation reason removed: 0; deactivation reasons: 4129 -> 4128; animating application lifecycle event: 1
+default	16:39:40.651791-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.652209-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4097 -> 4129; animating application lifecycle event: 1
+default	16:39:40.652580-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.652817-0400	BKGAudioDebug	Deactivation reason removed: 0; deactivation reasons: 4129 -> 4128; animating application lifecycle event: 1
+default	16:39:40.651849-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.673094-0400	BKGAudioDebug	policyStatus:<BKSHIDEventDeliveryPolicyObserver: 0x11c1ad0e0; token: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default; status: none> was:ancestor
+default	16:39:40.652272-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4097 -> 4129; animating application lifecycle event: 1
+default	16:39:40.673352-0400	BKGAudioDebug	observerPolicyDidChange: 0x11c1ad0e0 -> <_UIKeyWindowSceneObserver: 0x11c22cba0>
+default	16:39:40.652709-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.673439-0400	BKGAudioDebug	Scene target of keyboard event deferring environment did change: 0; scene: UIWindowScene: 0x101624980; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default
+default	16:39:40.652890-0400	BKGAudioDebug	Deactivation reason removed: 0; deactivation reasons: 4129 -> 4128; animating application lifecycle event: 1
+default	16:39:40.679922-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.673114-0400	BKGAudioDebug	policyStatus:<BKSHIDEventDeliveryPolicyObserver: 0x11c1ad0e0; token: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default; status: none> was:ancestor
+default	16:39:40.673373-0400	BKGAudioDebug	observerPolicyDidChange: 0x11c1ad0e0 -> <_UIKeyWindowSceneObserver: 0x11c22cba0>
+default	16:39:40.673460-0400	BKGAudioDebug	Scene target of keyboard event deferring environment did change: 0; scene: UIWindowScene: 0x101624980; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default
+default	16:39:40.673073-0400	BKGAudioDebug	policyStatus:<BKSHIDEventDeliveryPolicyObserver: 0x11c1ad0e0; token: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default; status: none> was:ancestor
+default	16:39:40.673331-0400	BKGAudioDebug	observerPolicyDidChange: 0x11c1ad0e0 -> <_UIKeyWindowSceneObserver: 0x11c22cba0>
+default	16:39:40.673418-0400	BKGAudioDebug	Scene target of keyboard event deferring environment did change: 0; scene: UIWindowScene: 0x101624980; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default
+default	16:39:40.673135-0400	BKGAudioDebug	policyStatus:<BKSHIDEventDeliveryPolicyObserver: 0x11c1ad0e0; token: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default; status: none> was:ancestor
+default	16:39:40.673394-0400	BKGAudioDebug	observerPolicyDidChange: 0x11c1ad0e0 -> <_UIKeyWindowSceneObserver: 0x11c22cba0>
+default	16:39:40.673480-0400	BKGAudioDebug	Scene target of keyboard event deferring environment did change: 0; scene: UIWindowScene: 0x101624980; scene identity: com.apple.frontboard.systemappservices/FBSceneManager:sceneID%3Acom.iskcon.bkgaudio.debug-default
+default	16:39:40.679945-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.679898-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:40.680047-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.269773-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.270205-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.269752-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.272367-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.272692-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.270183-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.272346-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.272670-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.269794-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.270226-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.272388-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.272713-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.269815-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.270246-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.272414-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.272735-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.373014-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.373424-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:41.378593-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.378680-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.379004-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.379084-0400	BKGAudioDebug	Deactivation reason removed: 3; deactivation reasons: 4136 -> 4128; animating application lifecycle event: 1
+default	16:39:41.372993-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.373403-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:41.380784-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.381546-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.373034-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.383521-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.373444-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:41.384027-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.378572-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.378660-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.378983-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.379064-0400	BKGAudioDebug	Deactivation reason removed: 3; deactivation reasons: 4136 -> 4128; animating application lifecycle event: 1
+default	16:39:41.380765-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.381525-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.378617-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.378700-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.383498-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.379024-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.379105-0400	BKGAudioDebug	Deactivation reason removed: 3; deactivation reasons: 4136 -> 4128; animating application lifecycle event: 1
+default	16:39:41.384007-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.373054-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.373481-0400	BKGAudioDebug	Not push traits update to screen for new style 1, <UIWindowScene: 0x101624980> (0FCD2C8C-4E01-4A71-B50D-196E81951D5E)
+default	16:39:41.380805-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.381566-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.383541-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.384048-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.378637-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.378725-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.379043-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.379123-0400	BKGAudioDebug	Deactivation reason removed: 3; deactivation reasons: 4136 -> 4128; animating application lifecycle event: 1
+default	16:39:41.380824-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.381586-0400	BKGAudioDebug	Deactivation reason added: 3; deactivation reasons: 4128 -> 4136; animating application lifecycle event: 1
+default	16:39:41.383562-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.384068-0400	BKGAudioDebug	Deactivation reason removed: 5; deactivation reasons: 4136 -> 4104; animating application lifecycle event: 0
+default	16:39:41.472698-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.473505-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.472677-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.473484-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.472719-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.473526-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.472738-0400	BKGAudioDebug	sceneOfRecord: sceneID: sceneID:com.iskcon.bkgaudio.debug-default  persistentID: 0FCD2C8C-4E01-4A71-B50D-196E81951D5E
+default	16:39:41.473546-0400	BKGAudioDebug	Deactivation reason added: 5; deactivation reasons: 4104 -> 4136; animating application lifecycle event: 1
+default	16:39:41.515400-0400	BKGAudioDebug	[(FBSceneManager):sceneID:com.iskcon.bkgaudio.debug-default] Received action(s) in scene-update: FBSceneSnapshotAction
+default	16:39:41.517910-0400	BKGAudioDebug	Preventing auto invalidation of scene: <_UIPlaceholderWindowScene: 0x11c2f3700>; assertionsCount: 1; assertion: <BSSimpleAssertion: 0x11e004fc0; identifier: _UIPlaceholderWindowScene-0x11c2f3700-1; reason: default scene disconnected; valid: YES>
+default	16:39:41.518230-0400	BKGAudioDebug	Migrating windows from disconnecting default scene: UIWindowScene: 0x101624980; to placeholder scene: _UIPlaceholderWindowScene: 0x11c2f3700; screen: 0x11c0f0280, isMain: 1, isMainLike: 1
+default	16:39:41.518430-0400	BKGAudioDebug	[0x11d7fd110] Initialized with scene: <UIWindowScene: 0x101624980>; behavior: <_UIEventDeferringBehavior_iOS: 0x11c3b6680>; availableForProcess: 1, systemShellManagesKeyboardFocus: 1
+default	16:39:41.518651-0400	BKGAudioDebug	UIWindowScene: 0x101624980: Window became key in scene: (nil): 0x0; contextId: 0x0: reason: UIWindowScene: 0x101624980: Remove detaching window from key window history: 0x101625b80
+default	16:39:41.519155-0400	BKGAudioDebug	Migrating key window from disconnecting default scene to placeholder scene: UIWindow: 0x101625b80
+default	16:39:41.519368-0400	BKGAudioDebug	_UIPlaceholderWindowScene: 0x11c2f3700: Window became key in scene: UIWindow: 0x101625b80; contextId: 0x0: reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519503-0400	BKGAudioDebug	Key window needs update: 1; currentKeyWindowScene: 0x0; evaluatedKeyWindowScene: 0x11c2f3700; currentApplicationKeyWindow: 0x0; evaluatedApplicationKeyWindow: 0x101625b80; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519602-0400	BKGAudioDebug	Window did become application key: UIWindow: 0x101625b80; contextId: 0x0; scene identity: (nil)
+default	16:39:41.519705-0400	BKGAudioDebug	[0x11d7fc770] Begin local event deferring requested for token: 0x11e0008a0; environments: 1; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Begin event deferring in keyboardFocus for window: 0x101625b80
+default	16:39:41.520245-0400	BKGAudioDebug	Will add backgroundTask with taskName: <private>, expirationHandler: <__NSGlobalBlock__: 0x1ff3b68f8>
+default	16:39:41.520550-0400	BKGAudioDebug	Reusing background assertion <BKSProcessAssertion: 0x11d4a5d10>
+default	16:39:41.520637-0400	BKGAudioDebug	Incrementing reference count for background assertion <private>
+default	16:39:41.520714-0400	BKGAudioDebug	Created background task <private>.
+default	16:39:41.515379-0400	BKGAudioDebug	[(FBSceneManager):sceneID:com.iskcon.bkgaudio.debug-default] Received action(s) in scene-update: FBSceneSnapshotAction
+default	16:39:41.517883-0400	BKGAudioDebug	Preventing auto invalidation of scene: <_UIPlaceholderWindowScene: 0x11c2f3700>; assertionsCount: 1; assertion: <BSSimpleAssertion: 0x11e004fc0; identifier: _UIPlaceholderWindowScene-0x11c2f3700-1; reason: default scene disconnected; valid: YES>
+default	16:39:41.518208-0400	BKGAudioDebug	Migrating windows from disconnecting default scene: UIWindowScene: 0x101624980; to placeholder scene: _UIPlaceholderWindowScene: 0x11c2f3700; screen: 0x11c0f0280, isMain: 1, isMainLike: 1
+default	16:39:41.518409-0400	BKGAudioDebug	[0x11d7fd110] Initialized with scene: <UIWindowScene: 0x101624980>; behavior: <_UIEventDeferringBehavior_iOS: 0x11c3b6680>; availableForProcess: 1, systemShellManagesKeyboardFocus: 1
+default	16:39:41.518629-0400	BKGAudioDebug	UIWindowScene: 0x101624980: Window became key in scene: (nil): 0x0; contextId: 0x0: reason: UIWindowScene: 0x101624980: Remove detaching window from key window history: 0x101625b80
+default	16:39:41.519134-0400	BKGAudioDebug	Migrating key window from disconnecting default scene to placeholder scene: UIWindow: 0x101625b80
+default	16:39:41.519346-0400	BKGAudioDebug	_UIPlaceholderWindowScene: 0x11c2f3700: Window became key in scene: UIWindow: 0x101625b80; contextId: 0x0: reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519443-0400	BKGAudioDebug	Key window needs update: 1; currentKeyWindowScene: 0x0; evaluatedKeyWindowScene: 0x11c2f3700; currentApplicationKeyWindow: 0x0; evaluatedApplicationKeyWindow: 0x101625b80; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519572-0400	BKGAudioDebug	Window did become application key: UIWindow: 0x101625b80; contextId: 0x0; scene identity: (nil)
+default	16:39:41.515422-0400	BKGAudioDebug	[(FBSceneManager):sceneID:com.iskcon.bkgaudio.debug-default] Received action(s) in scene-update: FBSceneSnapshotAction
+default	16:39:41.519681-0400	BKGAudioDebug	[0x11d7fc770] Begin local event deferring requested for token: 0x11e0008a0; environments: 1; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Begin event deferring in keyboardFocus for window: 0x101625b80
+default	16:39:41.520164-0400	BKGAudioDebug	Will add backgroundTask with taskName: <private>, expirationHandler: <__NSGlobalBlock__: 0x1ff3b68f8>
+default	16:39:41.520528-0400	BKGAudioDebug	Reusing background assertion <BKSProcessAssertion: 0x11d4a5d10>
+default	16:39:41.520617-0400	BKGAudioDebug	Incrementing reference count for background assertion <private>
+default	16:39:41.520695-0400	BKGAudioDebug	Created background task <private>.
+default	16:39:41.518250-0400	BKGAudioDebug	Migrating windows from disconnecting default scene: UIWindowScene: 0x101624980; to placeholder scene: _UIPlaceholderWindowScene: 0x11c2f3700; screen: 0x11c0f0280, isMain: 1, isMainLike: 1
+default	16:39:41.518451-0400	BKGAudioDebug	[0x11d7fd110] Initialized with scene: <UIWindowScene: 0x101624980>; behavior: <_UIEventDeferringBehavior_iOS: 0x11c3b6680>; availableForProcess: 1, systemShellManagesKeyboardFocus: 1
+default	16:39:41.518671-0400	BKGAudioDebug	UIWindowScene: 0x101624980: Window became key in scene: (nil): 0x0; contextId: 0x0: reason: UIWindowScene: 0x101624980: Remove detaching window from key window history: 0x101625b80
+default	16:39:41.519176-0400	BKGAudioDebug	Migrating key window from disconnecting default scene to placeholder scene: UIWindow: 0x101625b80
+default	16:39:41.519391-0400	BKGAudioDebug	_UIPlaceholderWindowScene: 0x11c2f3700: Window became key in scene: UIWindow: 0x101625b80; contextId: 0x0: reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519526-0400	BKGAudioDebug	Key window needs update: 1; currentKeyWindowScene: 0x0; evaluatedKeyWindowScene: 0x11c2f3700; currentApplicationKeyWindow: 0x0; evaluatedApplicationKeyWindow: 0x101625b80; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519637-0400	BKGAudioDebug	Window did become application key: UIWindow: 0x101625b80; contextId: 0x0; scene identity: (nil)
+default	16:39:41.519726-0400	BKGAudioDebug	[0x11d7fc770] Begin local event deferring requested for token: 0x11e0008a0; environments: 1; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Begin event deferring in keyboardFocus for window: 0x101625b80
+default	16:39:41.520268-0400	BKGAudioDebug	Will add backgroundTask with taskName: <private>, expirationHandler: <__NSGlobalBlock__: 0x1ff3b68f8>
+default	16:39:41.520575-0400	BKGAudioDebug	Reusing background assertion <BKSProcessAssertion: 0x11d4a5d10>
+default	16:39:41.520656-0400	BKGAudioDebug	Incrementing reference count for background assertion <private>
+default	16:39:41.520734-0400	BKGAudioDebug	Created background task <private>.
+default	16:39:41.515444-0400	BKGAudioDebug	[(FBSceneManager):sceneID:com.iskcon.bkgaudio.debug-default] Received action(s) in scene-update: FBSceneSnapshotAction
+default	16:39:41.519196-0400	BKGAudioDebug	Migrating key window from disconnecting default scene to placeholder scene: UIWindow: 0x101625b80
+default	16:39:41.519412-0400	BKGAudioDebug	_UIPlaceholderWindowScene: 0x11c2f3700: Window became key in scene: UIWindow: 0x101625b80; contextId: 0x0: reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519547-0400	BKGAudioDebug	Key window needs update: 1; currentKeyWindowScene: 0x0; evaluatedKeyWindowScene: 0x11c2f3700; currentApplicationKeyWindow: 0x0; evaluatedApplicationKeyWindow: 0x101625b80; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Window requested to become key in scene: 0x101625b80
+default	16:39:41.519659-0400	BKGAudioDebug	Window did become application key: UIWindow: 0x101625b80; contextId: 0x0; scene identity: (nil)
+default	16:39:41.519746-0400	BKGAudioDebug	[0x11d7fc770] Begin local event deferring requested for token: 0x11e0008a0; environments: 1; reason: _UIPlaceholderWindowScene: 0x11c2f3700: Begin event deferring in keyboardFocus for window: 0x101625b80
+default	16:39:41.520288-0400	BKGAudioDebug	Will add backgroundTask with taskName: <private>, expirationHandler: <__NSGlobalBlock__: 0x1ff3b68f8>
+default	16:39:41.520596-0400	BKGAudioDebug	Reusing background assertion <BKSProcessAssertion: 0x11d4a5d10>
+default	16:39:41.520674-0400	BKGAudioDebug	Incrementing reference count for background assertion <private>
+default	16:39:41.520760-0400	BKGAudioDebug	Created background task <private>.
