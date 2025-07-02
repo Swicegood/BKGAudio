@@ -88,6 +88,13 @@ module.exports = async function () {
   TrackPlayer.addEventListener(Event.RemotePrevious, async () => {
     customLog('RemotePrevious event received');
     try {
+      // Log current state before making changes
+      const currentTrack = await TrackPlayer.getActiveTrackIndex();
+      if (currentTrack !== null && currentTrack !== undefined) {
+        const trackObject = await TrackPlayer.getTrack(currentTrack);
+        customLog('Current track before previous:', trackObject?.url);
+      }
+      
       const { getPreviousFile } = require('./apiWrapper');
       const previousFile = await getPreviousFile();
       
@@ -101,9 +108,12 @@ module.exports = async function () {
           title: previousFile.split('/').pop().replace(/\.mp3$/, ''),
         });
         
+        customLog('Successfully added previous track to player:', previousFile);
+        
         const focusGranted = await requestAudioFocus();
         if (focusGranted) {
           await playWithRetry();
+          customLog('Started playing previous track from lockscreen');
         } else {
           customError('Failed to get audio focus for previous track');
         }

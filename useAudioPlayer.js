@@ -49,6 +49,32 @@ const useAudioPlayer = (onSongLoaded) => {
         customLog('At leading edge:', isAtLeadingEdge);
         customLog('Can go previous:', currentIndex > 0);
         customLog('Can go next (in history):', currentIndex < history.length - 1);
+        
+        // Check for duplicate entries in recent history
+        if (currentIndex > 0) {
+          const previousTrack = history[currentIndex - 1];
+          if (previousTrack === currentTrack) {
+            customLog('⚠️ WARNING: Current track is same as previous track - possible duplicate in history');
+          }
+        }
+        
+        // Log currently playing track from TrackPlayer for comparison
+        try {
+          const activeTrackIndex = await TrackPlayer.getActiveTrackIndex();
+          if (activeTrackIndex !== null && activeTrackIndex !== undefined) {
+            const activeTrack = await TrackPlayer.getTrack(activeTrackIndex);
+            customLog('TrackPlayer active track:', activeTrack?.url?.split('/').pop());
+            
+            // Check if history and TrackPlayer are in sync
+            if (activeTrack?.url !== currentTrack) {
+              customLog('⚠️ WARNING: History and TrackPlayer are out of sync');
+              customLog('  History says:', currentTrack?.split('/').pop());
+              customLog('  TrackPlayer says:', activeTrack?.url?.split('/').pop());
+            }
+          }
+        } catch (trackError) {
+          customError('Error checking active track:', trackError);
+        }
       }
     } catch (error) {
       customError('Error updating history state:', error);
@@ -119,6 +145,10 @@ const useAudioPlayer = (onSongLoaded) => {
         onSongLoaded(true);
         setIsTrackEnded(false);
         nextTrackUrl.current = null; // Reset next track URL as it's now the current track
+        
+        // Update history state to sync with any changes made by the service
+        await updateHistoryState();
+        customLog('History state synced after track change from service');
       }
     } else if (event.type === Event.PlaybackState) {
       setIsPlaying(event.state === State.Playing);
