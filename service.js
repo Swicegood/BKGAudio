@@ -62,6 +62,11 @@ module.exports = async function () {
 
   TrackPlayer.addEventListener(Event.RemoteNext, async () => {
     customLog('RemoteNext event received');
+    
+    // Set manual navigation flag to prevent auto-continuation interference
+    isManualNavigation = true;
+    customLog('Manual navigation flag set to true for RemoteNext');
+    
     try {
       const { getNextFile } = require('./apiWrapper');
       const nextFile = await getNextFile();
@@ -82,11 +87,22 @@ module.exports = async function () {
       }
     } catch (error) {
       customError('Error in RemoteNext event:', error);
+    } finally {
+      // Clear manual navigation flag after a delay to prevent race conditions
+      setTimeout(() => {
+        isManualNavigation = false;
+        customLog('Manual navigation flag cleared after RemoteNext');
+      }, 3000);
     }
   });
 
   TrackPlayer.addEventListener(Event.RemotePrevious, async () => {
     customLog('RemotePrevious event received');
+    
+    // Set manual navigation flag to prevent auto-continuation interference
+    isManualNavigation = true;
+    customLog('Manual navigation flag set to true for RemotePrevious');
+    
     try {
       // Log current state before making changes
       const currentTrack = await TrackPlayer.getActiveTrackIndex();
@@ -122,6 +138,12 @@ module.exports = async function () {
       }
     } catch (error) {
       customError('Error in RemotePrevious event:', error);
+    } finally {
+      // Clear manual navigation flag after a delay to prevent race conditions
+      setTimeout(() => {
+        isManualNavigation = false;
+        customLog('Manual navigation flag cleared after RemotePrevious');
+      }, 3000);
     }
   });
 
@@ -186,13 +208,15 @@ module.exports = async function () {
     } else if (event.state === State.Stopped) {
       customLog('Playback stopped, checking if queue is empty');
       const queue = await TrackPlayer.getQueue();
+      customLog('Current queue length:', queue.length, 'Manual navigation flag:', isManualNavigation);
+      
       if (queue.length === 0) {
         if (isManualNavigation) {
-          customLog('Manual navigation in progress, skipping auto-continuation');
+          customLog('🚫 Manual navigation in progress, skipping auto-continuation');
           return;
         }
         
-        customLog('Queue is empty, fetching next file (natural track ending)');
+        customLog('✅ Queue is empty, fetching next file (natural track ending)');
         const { getNextFile } = require('./apiWrapper');
         const nextFile = await getNextFile();
         customLog('Next file to play:', nextFile);
@@ -203,6 +227,8 @@ module.exports = async function () {
         });
         await TrackPlayer.play();
         customLog('Started playing next file');
+      } else {
+        customLog('Queue has tracks, no auto-continuation needed');
       }
     }
   });
