@@ -20,7 +20,7 @@
     },
     "production": {
       "env": {
-        "APP_VARIANT": "debug"
+        "APP_VARIANT": "support"
       }
     }
   },

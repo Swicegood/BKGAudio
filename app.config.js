@@ -1,5 +1,6 @@
 module.exports = ({ config }) => {
   const isDebug = process.env.APP_VARIANT === 'debug';
+  const isSupport = process.env.APP_VARIANT === 'support';
 
   return {
     name: isDebug ? "BKGAudio (Debug)" : "BKGAudio",
@@ -43,7 +44,7 @@ module.exports = ({ config }) => {
       eas: {
         projectId: "4ba6b561-4157-47fc-b95b-5369a02198cd"
       },
-      enableVerboseLogging: isDebug,
+      enableVerboseLogging: isSupport || isDebug,
     },
     updates: {
       url: "https://u.expo.dev/4ba6b561-4157-47fc-b95b-5369a02198cd"
