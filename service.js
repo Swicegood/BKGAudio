@@ -1,40 +1,24 @@
 import TrackPlayer, { Event, PlaybackState } from '@rntp/player';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { customLog, customError } from './customLogger';
-import { setAudioModeAsync } from 'expo-audio';
 import { loadUrl, playWithRetry } from './player';
 
 let isManualNavigation = false;
 let listenersRegistered = false;
+let isHandlingEnded = false;
 
 global.setManualNavigation = (value) => {
   isManualNavigation = value;
   customLog('Manual navigation flag set to:', value);
 };
 
-const requestAudioFocus = async () => {
-  try {
-    await setAudioModeAsync({
-      shouldPlayInBackground: true,
-      interruptionMode: 'doNotMix',
-      playsInSilentMode: true,
-      shouldRouteThroughEarpiece: false,
-    });
-    return true;
-  } catch (error) {
-    customError('Failed to set audio mode:', error);
-    return false;
-  }
-};
-
 const loadAndPlayUrl = async (url) => {
-  loadUrl(url);
-  const focusGranted = await requestAudioFocus();
-  if (focusGranted) {
-    await playWithRetry();
-  } else {
-    customError('Failed to get audio focus');
+  if (!url) {
+    customError('No URL provided to loadAndPlayUrl');
+    return;
   }
+  loadUrl(url);
+  await playWithRetry();
 };
 
 const handleRemoteNext = async () => {
@@ -98,11 +82,12 @@ const handleRemoteStop = async () => {
 };
 
 const handlePlaybackEnded = async () => {
-  if (isManualNavigation) {
-    customLog('Manual navigation in progress, skipping auto-continuation');
+  if (isManualNavigation || isHandlingEnded) {
+    customLog('Skipping auto-continuation', { isManualNavigation, isHandlingEnded });
     return;
   }
 
+  isHandlingEnded = true;
   try {
     customLog('Playback ended, fetching next file');
     const { getNextFile } = require('./apiWrapper');
@@ -111,6 +96,10 @@ const handlePlaybackEnded = async () => {
     await loadAndPlayUrl(nextFile);
   } catch (error) {
     customError('Error after playback ended:', error);
+  } finally {
+    setTimeout(() => {
+      isHandlingEnded = false;
+    }, 2000);
   }
 };
 

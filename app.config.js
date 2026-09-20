@@ -5,7 +5,7 @@ module.exports = ({ config }) => {
   return {
     name: isDebug ? "BKGAudio (Debug)" : "BKGAudio",
     slug: "bkgaudio",
-    version: "2.3.0",
+    version: "2.3.1",
     platforms: ["ios", "android"],
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -22,7 +22,7 @@ module.exports = ({ config }) => {
       infoPlist: {
         UIBackgroundModes: ["audio", "fetch"]
       },
-      buildNumber: "23",
+      buildNumber: "24",
       config: {
         usesSwift: true,
         swiftVersion: "5.0"
@@ -34,7 +34,7 @@ module.exports = ({ config }) => {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
-      versionCode: 9,
+      versionCode: 10,
       permissions: [
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
@@ -44,7 +44,16 @@ module.exports = ({ config }) => {
     },
     newArchEnabled: true,
     plugins: [
-      "expo-font",
+      [
+        "expo-font",
+        {
+          fonts: [
+            "./assets/fonts/Satoshi-Bold.otf",
+            "./assets/fonts/Satoshi-Regular.otf",
+            "./assets/fonts/material.ttf",
+          ],
+        },
+      ],
       "expo-asset",
       [
         "expo-audio",

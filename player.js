@@ -46,9 +46,12 @@ export function setupAppPlayer() {
 
   try {
     TrackPlayer.setupPlayer({
-      contentType: 'music',
+      contentType: 'speech',
       handleAudioBecomingNoisy: true,
       audioMixing: 'exclusive',
+      cache: {
+        maxSizeBytes: 256 * 1024 * 1024,
+      },
       android: {
         wakeMode: 'network',
         taskRemovedBehavior: 'continue',

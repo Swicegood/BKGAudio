@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, SafeAreaView, StyleSheet, Text, AppState, TouchableOpacity, AppStateStatus } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Font from 'expo-font';
+import ExpoFontLoader from 'expo-font/build/ExpoFontLoader';
 import useAudioPlayer from './useAudioPlayer';
 import BasicMusicPlayer from './BasicMusicPlayer';
 import DebugScreen from './DebugScreen';
@@ -20,6 +21,13 @@ const loadFonts = async () => {
     });
   } catch (error) {
     customError('Error loading fonts:', error);
+  }
+  try {
+    if (!Font.isLoaded('material')) {
+      await ExpoFontLoader.loadAsync('material', 'asset:///fonts/material.ttf');
+    }
+  } catch (error) {
+    customError('Error loading icon font:', error);
   }
 };
 
@@ -60,9 +68,9 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const onSongLoaded = (isLoaded: boolean) => {
+  const onSongLoaded = useCallback((isLoaded: boolean) => {
     setIsSongLoaded(isLoaded);
-  };
+  }, []);
 
   const audioPlayerData = useAudioPlayer(onSongLoaded);
 

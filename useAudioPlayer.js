@@ -5,7 +5,6 @@ import TrackPlayer, { Event, PlaybackState, useIsPlaying, useProgress } from '@r
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile, getPlayedHistory, getCurrentHistoryIndex, migrateToNewSystem } from './apiWrapper';
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
-import { setAudioModeAsync } from 'expo-audio';
 import { loadUrl, mediaItemFromUrl, setupAppPlayer } from './player';
 
 const useAudioPlayer = (onSongLoaded) => {
@@ -82,31 +81,9 @@ const useAudioPlayer = (onSongLoaded) => {
     }
   };
 
-  const ensureAudioSessionActive = async () => {
-    try {
-      await setAudioModeAsync({
-        shouldPlayInBackground: true,
-        interruptionMode: 'doNotMix',
-        playsInSilentMode: true,
-        shouldRouteThroughEarpiece: false,
-      });
-      console.log('Audio session reactivated');
-    } catch (error) {
-      console.error('Error reactivating audio session:', error);
-    }
-  };
-
   useEffect(() => {
-    const setupAudioAndWatchdog = async () => {
-      await ensureAudioSessionActive();
-      
-      // Start the watchdog
-      watchdogIntervalRef.current = startPlaybackWatchdog();
-    };
+    watchdogIntervalRef.current = startPlaybackWatchdog();
 
-    setupAudioAndWatchdog();
-
-    // Clean up function
     return () => {
       if (watchdogIntervalRef.current) {
         clearInterval(watchdogIntervalRef.current);
@@ -135,6 +112,15 @@ const useAudioPlayer = (onSongLoaded) => {
   useEffect(() => {
     const errorSub = TrackPlayer.addEventListener(Event.PlaybackError, async (event) => {
       customError('Playback error:', event);
+      if (event?.code === 'network' || event?.code === 'unknown') {
+        try {
+          TrackPlayer.retry();
+          TrackPlayer.play();
+          return;
+        } catch (retryError) {
+          customError('Retry after playback error failed:', retryError);
+        }
+      }
       nextTrackUrl.current = null;
       await debouncedLoadNextFile();
     });
@@ -183,83 +169,6 @@ const useAudioPlayer = (onSongLoaded) => {
       stateSub.remove();
     };
   }, [isTestMode, onSongLoaded]);
-
-  // Progress monitoring with preloading logic - simplified approach
-  useEffect(() => {
-    let interval = null;
-    const intervalId = Math.random();
-    
-    if (isPlaying) {
-      customLog('Starting progress monitoring interval with ID:', intervalId);
-      
-      interval = setInterval(async () => {
-        try {
-          const { position: currentPosition, duration: currentDuration } = TrackPlayer.getProgress();
-          
-          // Preload next track when we're 30 seconds from the end (with debouncing)
-          const timeToEnd = currentDuration - currentPosition;
-          if (currentDuration > 30 && timeToEnd <= 30) {
-            const now = Date.now();
-            // Only check for preload once every 500ms to prevent rapid-fire calls while staying fast
-            if (now - lastPreloadCheck.current > 500) {
-              lastPreloadCheck.current = now;
-              customLog('Progress monitor triggering preload (interval ID:', intervalId + ')');
-              await preloadNextTrack();
-            }
-          }
-          
-          // If we're within 1 second of the end, transition to next track (increased from 0.5 for faster transition)
-          if (currentDuration > 0 && timeToEnd <= 1.0) {
-            // Prevent duplicate transitions
-            if (isTransitioning.current) {
-              customLog('Track transition already in progress, skipping (interval ID:', intervalId + ')');
-              return;
-            }
-            
-            isTransitioning.current = true;
-            customLog('Track near end, transitioning to next track (interval ID:', intervalId + ')');
-            setIsTrackEnded(true);
-            
-            // Ensure immediate transition with no gaps
-            try {
-              const queue = TrackPlayer.getQueue();
-              const index = TrackPlayer.getActiveMediaItemIndex();
-              if (index !== null && index < queue.length - 1) {
-                TrackPlayer.skipToNext();
-                TrackPlayer.play();
-              } else {
-                const nextFile = nextTrackUrl.current || await getNextFile();
-                nextTrackUrl.current = null;
-                if (nextFile) {
-                  loadUrl(nextFile);
-                  TrackPlayer.play();
-                }
-              }
-              customLog('Track transition completed');
-            } catch (error) {
-              customError('Error in track transition:', error);
-            } finally {
-              // Reset transition flag after a short delay to allow the transition to complete
-              setTimeout(() => {
-                isTransitioning.current = false;
-              }, 1000);
-            }
-          }
-        } catch (error) {
-          customError('Error checking progress:', error);
-        }
-      }, 100);
-         } else {
-       customLog('Not playing, no progress monitoring needed for interval ID:', intervalId);
-     }
-     
-     return () => {
-       customLog('Cleaning up progress monitoring interval with ID:', intervalId);
-       if (interval) {
-         clearInterval(interval);
-       }
-     };
-  }, [isPlaying]);
 
   const loadRandomFile = async () => {
     try {
@@ -468,7 +377,6 @@ const useAudioPlayer = (onSongLoaded) => {
       const playerState = TrackPlayer.getPlaybackState();
       if (playerState === PlaybackState.Ready && !TrackPlayer.isPlaying() && !hasAutoPlayedOnce.current) {
         customLog('Player ready but not playing, attempting to resume (first load only)');
-        await ensureAudioSessionActive();
         TrackPlayer.play();
         hasAutoPlayedOnce.current = true;
       } else if (playerState === PlaybackState.Ready && !TrackPlayer.isPlaying()) {
