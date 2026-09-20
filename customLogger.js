@@ -1,7 +1,7 @@
 import StorageManager from './StorageManager';
 import Constants from 'expo-constants';
 
-const isDebug = Constants.expoConfig.extra.enableVerboseLogging;
+const isDebug = Boolean(Constants.expoConfig?.extra?.enableVerboseLogging);
 const MAX_LOGS = 100;
 const LOG_KEY = 'DEBUG_LOGS';
 const LOG_QUEUE = [];

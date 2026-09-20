@@ -6,9 +6,10 @@ import { getAllFiles, getRandomFile, getPreviousFile, getNextFile, getPlayedHist
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
 import { setAudioModeAsync } from 'expo-audio';
-import { loadUrl, mediaItemFromUrl } from './player';
+import { loadUrl, mediaItemFromUrl, setupAppPlayer } from './player';
 
 const useAudioPlayer = (onSongLoaded) => {
+  setupAppPlayer();
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const isPlaying = useIsPlaying();
   const [songTitle, setSongTitle] = useState(null);

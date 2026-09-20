@@ -3,9 +3,7 @@ import TrackPlayer from '@rntp/player';
 
 import App from './App';
 import { handleBackgroundEvent } from './service';
-import { setupAppPlayer } from './player';
 
-setupAppPlayer();
 TrackPlayer.registerBackgroundEventHandler(() => handleBackgroundEvent);
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);

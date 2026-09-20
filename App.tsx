@@ -7,7 +7,9 @@ import BasicMusicPlayer from './BasicMusicPlayer';
 import DebugScreen from './DebugScreen';
 import SplashScreen from './SplashScreen';
 import { registerBackgroundFetch, unregisterBackgroundFetch } from './backgroundFetch';
+import ErrorBoundary from './ErrorBoundary';
 import { customError } from './customLogger';
+import { setupAppPlayer } from './player';
 import { registerPlayerEventListeners } from './service';
 
 const loadFonts = async () => {
@@ -30,6 +32,7 @@ const setupPlayer = () => {
 };
 
 const App: React.FC = () => {
+  setupAppPlayer();
   const [isSongLoaded, setIsSongLoaded] = useState(false);
   const [isFontLoaded, setIsFontLoaded] = useState(false);
   const appState = useRef(AppState.currentState);
@@ -64,10 +67,15 @@ const App: React.FC = () => {
   const audioPlayerData = useAudioPlayer(onSongLoaded);
 
   if (!isFontLoaded) {
-    return <SplashScreen />;
+    return (
+      <ErrorBoundary>
+        <SplashScreen />
+      </ErrorBoundary>
+    );
   }
 
   return (
+    <ErrorBoundary>
     <View style={styles.container}>
       {showDebugScreen ? (
         <DebugScreen 
@@ -97,6 +105,7 @@ const App: React.FC = () => {
       )}
       <StatusBar style="auto" />
     </View>
+    </ErrorBoundary>
   );
 };
 

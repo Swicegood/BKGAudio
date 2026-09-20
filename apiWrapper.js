@@ -8,8 +8,7 @@ let operationLock = false;
 
 async function fetchFilesList(filesListUrl) {
   try {
-    proxyUrl = '';
-    const response = await fetch(proxyUrl + filesListUrl);
+    const response = await fetch(filesListUrl);
     const txt = await response.text();
     if (!txt) {
       throw new Error('Empty response');

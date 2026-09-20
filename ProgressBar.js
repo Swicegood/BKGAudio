@@ -6,13 +6,13 @@ const ProgressBar = ({ duration, position, onSeek }) => {
   const [containerWidth, setContainerWidth] = useState(0);
 
   const formatTime = (totalSeconds) => {
-    wholeSeconds = Math.floor(totalSeconds);
+    const wholeSeconds = Math.floor(Number(totalSeconds) || 0);
     const minutes = Math.floor(wholeSeconds / 60);
     const seconds = wholeSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const progress = position / duration;
+  const progress = duration > 0 ? Math.min(1, Math.max(0, position / duration)) : 0;
 
   const handleProgressBarPress = (event) => {
     console.log('ProgressBar: Touch detected on progress bar');

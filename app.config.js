@@ -5,7 +5,7 @@ module.exports = ({ config }) => {
   return {
     name: isDebug ? "BKGAudio (Debug)" : "BKGAudio",
     slug: "bkgaudio",
-    version: "2.1.0",
+    version: "2.3.0",
     platforms: ["ios", "android"],
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -22,7 +22,7 @@ module.exports = ({ config }) => {
       infoPlist: {
         UIBackgroundModes: ["audio", "fetch"]
       },
-      buildNumber: "21",
+      buildNumber: "23",
       config: {
         usesSwift: true,
         swiftVersion: "5.0"
@@ -34,7 +34,7 @@ module.exports = ({ config }) => {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
-      versionCode: 7,
+      versionCode: 9,
       permissions: [
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
@@ -75,7 +75,8 @@ module.exports = ({ config }) => {
       enableVerboseLogging: isSupport || isDebug,
     },
     updates: {
-      url: "https://u.expo.dev/4ba6b561-4157-47fc-b95b-5369a02198cd"
+      url: "https://u.expo.dev/4ba6b561-4157-47fc-b95b-5369a02198cd",
+      checkAutomatically: "NEVER",
     },
     runtimeVersion: {
       policy: "appVersion"

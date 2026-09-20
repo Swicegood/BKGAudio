@@ -12,7 +12,11 @@ export function mediaItemFromUrl(url, mediaId) {
 }
 
 export function loadUrl(url, mediaId) {
-  TrackPlayer.setMediaItem(mediaItemFromUrl(url, mediaId));
+  try {
+    TrackPlayer.setMediaItem(mediaItemFromUrl(url, mediaId));
+  } catch (error) {
+    customError('Failed to load media item:', error);
+  }
 }
 
 export async function playWithRetry(retries = 3) {
@@ -33,7 +37,13 @@ export async function playWithRetry(retries = 3) {
   return false;
 }
 
+let didSetup = false;
+
 export function setupAppPlayer() {
+  if (didSetup) {
+    return;
+  }
+
   try {
     TrackPlayer.setupPlayer({
       contentType: 'music',
@@ -45,30 +55,39 @@ export function setupAppPlayer() {
       },
     });
   } catch (error) {
-    customLog('Player already set up:', error?.message || error);
+    const message = String(error?.message || error);
+    if (!message.includes('already set up')) {
+      customError('Failed to set up player:', error);
+      return;
+    }
   }
 
-  TrackPlayer.setCommands({
-    capabilities: [
-      PlayerCommand.PlayPause,
-      PlayerCommand.Next,
-      PlayerCommand.Previous,
-      PlayerCommand.Seek,
-      PlayerCommand.SkipForward,
-      PlayerCommand.SkipBackward,
-      PlayerCommand.Stop,
-    ],
-    handling: 'hybrid',
-    perCommandHandling: {
-      [PlayerCommand.PlayPause]: 'native',
-      [PlayerCommand.Seek]: 'native',
-      [PlayerCommand.SkipForward]: 'native',
-      [PlayerCommand.SkipBackward]: 'native',
-      [PlayerCommand.Next]: 'js',
-      [PlayerCommand.Previous]: 'js',
-      [PlayerCommand.Stop]: 'js',
-    },
-    forwardInterval: 30,
-    backwardInterval: 15,
-  });
+  try {
+    TrackPlayer.setCommands({
+      capabilities: [
+        PlayerCommand.PlayPause,
+        PlayerCommand.Next,
+        PlayerCommand.Previous,
+        PlayerCommand.Seek,
+        PlayerCommand.SkipForward,
+        PlayerCommand.SkipBackward,
+        PlayerCommand.Stop,
+      ],
+      handling: 'hybrid',
+      perCommandHandling: {
+        [PlayerCommand.PlayPause]: 'native',
+        [PlayerCommand.Seek]: 'native',
+        [PlayerCommand.SkipForward]: 'native',
+        [PlayerCommand.SkipBackward]: 'native',
+        [PlayerCommand.Next]: 'js',
+        [PlayerCommand.Previous]: 'js',
+        [PlayerCommand.Stop]: 'js',
+      },
+      forwardInterval: 30,
+      backwardInterval: 15,
+    });
+    didSetup = true;
+  } catch (error) {
+    customError('Failed to set player commands:', error);
+  }
 }
