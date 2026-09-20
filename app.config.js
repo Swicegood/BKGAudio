@@ -34,9 +34,37 @@ module.exports = ({ config }) => {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
-      versionCode: 5,
-      permissions: ["FOREGROUND_SERVICE", "WAKE_LOCK"]
+      versionCode: 7,
+      permissions: [
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "WAKE_LOCK",
+        "POST_NOTIFICATIONS",
+      ],
     },
+    newArchEnabled: true,
+    plugins: [
+      "expo-font",
+      "expo-asset",
+      [
+        "expo-audio",
+        {
+          enableBackgroundPlayback: false,
+          recordAudioAndroid: false,
+          microphonePermission: false,
+        },
+      ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            compileSdkVersion: 36,
+            targetSdkVersion: 36,
+            buildToolsVersion: "36.0.0",
+          },
+        },
+      ],
+    ],
     web: {
       favicon: "./assets/favicon.png",
     },

@@ -1,5 +1,6 @@
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
+import TrackPlayer from '@rntp/player';
 import { customLog, customError } from './customLogger';
 
 const BACKGROUND_FETCH_TASK = 'background-fetch';
@@ -9,7 +10,7 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
     customLog('Background fetch started');
     // Your background fetch logic here
       // No track playing, try to start the next one
-    await TrackPlayer.play();
+    TrackPlayer.play();
     customLog('Background fetch completed');
     return BackgroundFetch.BackgroundFetchResult.NewData;
   } catch (error) {

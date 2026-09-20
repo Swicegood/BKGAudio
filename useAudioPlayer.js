@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import StorageManager from './StorageManager';
-import TrackPlayer, { State, Event, useTrackPlayerEvents, useProgress } from 'react-native-track-player';
+import TrackPlayer, { Event, PlaybackState, useIsPlaying, useProgress } from '@rntp/player';
 import { getAllFiles, getRandomFile, getPreviousFile, getNextFile, getPlayedHistory, getCurrentHistoryIndex, migrateToNewSystem } from './apiWrapper';
 import { debounce } from 'lodash';
 import { customLog, customError } from './customLogger';
-import { InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { setAudioModeAsync } from 'expo-audio';
+import { loadUrl, mediaItemFromUrl } from './player';
 
 const useAudioPlayer = (onSongLoaded) => {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const isPlaying = useIsPlaying();
   const [songTitle, setSongTitle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isTestMode, setIsTestMode] = useState(false);
@@ -60,9 +61,8 @@ const useAudioPlayer = (onSongLoaded) => {
         
         // Log currently playing track from TrackPlayer for comparison
         try {
-          const activeTrackIndex = await TrackPlayer.getActiveTrackIndex();
-          if (activeTrackIndex !== null && activeTrackIndex !== undefined) {
-            const activeTrack = await TrackPlayer.getTrack(activeTrackIndex);
+          const activeTrack = TrackPlayer.getActiveMediaItem();
+          if (activeTrack) {
             customLog('TrackPlayer active track:', activeTrack?.url?.split('/').pop());
             
             // Check if history and TrackPlayer are in sync
@@ -83,13 +83,11 @@ const useAudioPlayer = (onSongLoaded) => {
 
   const ensureAudioSessionActive = async () => {
     try {
-      await Audio.setAudioModeAsync({
-        staysActiveInBackground: true,
-        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-        playThroughEarpieceAndroid: false,
+      await setAudioModeAsync({
+        shouldPlayInBackground: true,
+        interruptionMode: 'doNotMix',
+        playsInSilentMode: true,
+        shouldRouteThroughEarpiece: false,
       });
       console.log('Audio session reactivated');
     } catch (error) {
@@ -133,46 +131,38 @@ const useAudioPlayer = (onSongLoaded) => {
     };
   }, []);
 
-  useTrackPlayerEvents([Event.PlaybackTrackChanged, Event.PlaybackState, Event.PlaybackError], async (event) => {
-    if (event.type === Event.PlaybackError) {
-      customError('Playback error:', event.error);
-      nextTrackUrl.current = null; // Reset next track URL on error
+  useEffect(() => {
+    const errorSub = TrackPlayer.addEventListener(Event.PlaybackError, async (event) => {
+      customError('Playback error:', event);
+      nextTrackUrl.current = null;
       await debouncedLoadNextFile();
-    } else if (event.type === Event.PlaybackTrackChanged && event.nextTrack !== null) {
-      const track = await TrackPlayer.getTrack(event.nextTrack);
-      if (track) {
-        setSongTitle(track.title);
-        onSongLoaded(true);
-        setIsTrackEnded(false);
-        nextTrackUrl.current = null; // Reset next track URL as it's now the current track
-        
-        // Update history state to sync with any changes made by the service
-        await updateHistoryState();
-        customLog('History state synced after track change from service');
+    });
+
+    const transitionSub = TrackPlayer.addEventListener(Event.MediaItemTransition, async (event) => {
+      if (!event.item) {
+        return;
       }
-    } else if (event.type === Event.PlaybackState) {
-      setIsPlaying(event.state === State.Playing);
-      
-      // Apply test mode when track is ready
-      if (event.state === State.Ready && isTestMode) {
+      setSongTitle(event.item.title);
+      onSongLoaded(true);
+      setIsTrackEnded(false);
+      nextTrackUrl.current = null;
+      await updateHistoryState();
+      customLog('History state synced after track change');
+    });
+
+    const stateSub = TrackPlayer.addEventListener(Event.PlaybackStateChanged, async (event) => {
+      if (event.state === PlaybackState.Ready && isTestMode) {
         customLog('Track ready in test mode, seeking to last 31 seconds');
         try {
-          // Wait a short moment for duration to be available
           await new Promise(resolve => setTimeout(resolve, 500));
-          const trackDuration = await TrackPlayer.getDuration();
+          const trackDuration = TrackPlayer.getProgress().duration;
           if (trackDuration > 31) {
-            // Get current track info to prevent duplicate seeks
-            const currentTrack = await TrackPlayer.getActiveTrackIndex();
-            const trackObject = await TrackPlayer.getTrack(currentTrack);
-            const trackUrl = trackObject?.url;
-            
-            // Only seek if we haven't already seeked this track recently
+            const trackUrl = TrackPlayer.getActiveMediaItem()?.url;
             const now = Date.now();
             if (!trackUrl || !lastTestModeSeek.current[trackUrl] || now - lastTestModeSeek.current[trackUrl] > 2000) {
               const seekPosition = trackDuration - 31;
               customLog('Seeking to position:', seekPosition, 'for track:', trackUrl);
-              await TrackPlayer.seekTo(seekPosition);
-              
+              TrackPlayer.seekTo(seekPosition);
               if (trackUrl) {
                 lastTestModeSeek.current[trackUrl] = now;
               }
@@ -184,15 +174,14 @@ const useAudioPlayer = (onSongLoaded) => {
           customError('Error seeking in test mode:', error);
         }
       }
-      
-      if (event.state === State.Stopped && isTrackEnded) {
-        customLog('Track ended, transitioning to next track');
-        await TrackPlayer.skipToNext();
-        await TrackPlayer.play();
-        setIsTrackEnded(false);
-      }
-    }
-  });
+    });
+
+    return () => {
+      errorSub.remove();
+      transitionSub.remove();
+      stateSub.remove();
+    };
+  }, [isTestMode, onSongLoaded]);
 
   // Progress monitoring with preloading logic - simplified approach
   useEffect(() => {
@@ -204,8 +193,7 @@ const useAudioPlayer = (onSongLoaded) => {
       
       interval = setInterval(async () => {
         try {
-          const currentPosition = await TrackPlayer.getPosition();
-          const currentDuration = await TrackPlayer.getDuration();
+          const { position: currentPosition, duration: currentDuration } = TrackPlayer.getProgress();
           
           // Preload next track when we're 30 seconds from the end (with debouncing)
           const timeToEnd = currentDuration - currentPosition;
@@ -233,8 +221,19 @@ const useAudioPlayer = (onSongLoaded) => {
             
             // Ensure immediate transition with no gaps
             try {
-              await TrackPlayer.skipToNext();
-              await TrackPlayer.play();
+              const queue = TrackPlayer.getQueue();
+              const index = TrackPlayer.getActiveMediaItemIndex();
+              if (index !== null && index < queue.length - 1) {
+                TrackPlayer.skipToNext();
+                TrackPlayer.play();
+              } else {
+                const nextFile = nextTrackUrl.current || await getNextFile();
+                nextTrackUrl.current = null;
+                if (nextFile) {
+                  loadUrl(nextFile);
+                  TrackPlayer.play();
+                }
+              }
               customLog('Track transition completed');
             } catch (error) {
               customError('Error in track transition:', error);
@@ -267,24 +266,17 @@ const useAudioPlayer = (onSongLoaded) => {
       const randomFile = await getRandomFile();
       if (randomFile) {
         customLog('Random file obtained:', randomFile);
-        await TrackPlayer.reset();
-        await TrackPlayer.add({
-          id: '1',
-          url: randomFile,
-          title: randomFile.split('/').pop().replace(/\.mp3$/, ''),
-        });
+        loadUrl(randomFile, '1');
         setSongTitle(randomFile.split('/').pop().replace(/\.mp3$/, ''));
         setIsLoading(false);
         customLog('isLoading set to false');
         onSongLoaded(true);
         customLog('onSongLoaded(true) called');
         
-        // Update history state after loading random file
         await updateHistoryState();
         
-        // Only auto-play on the very first load
         if (!hasAutoPlayedOnce.current) {
-          await TrackPlayer.play();
+          TrackPlayer.play();
           hasAutoPlayedOnce.current = true;
           customLog('TrackPlayer.play() called - first time auto-play');
         } else {
@@ -307,32 +299,26 @@ const useAudioPlayer = (onSongLoaded) => {
       customLog('Loading file:', fileUrl);
       customLog('Test mode status:', isTestMode);
       
-      await TrackPlayer.reset();
-      await TrackPlayer.add({
-        id: 'current',
-        url: fileUrl,
-        title: fileUrl.split('/').pop().replace(/\.mp3$/, ''),
-      });
+      loadUrl(fileUrl, 'current');
       setSongTitle(fileUrl.split('/').pop().replace(/\.mp3$/, ''));
       
       if (isTestMode) {
         customLog('Test mode enabled, seeking to last 31 seconds');
         try {
           await new Promise(resolve => setTimeout(resolve, 500));
-          const trackDuration = await TrackPlayer.getDuration();
+          const trackDuration = TrackPlayer.getProgress().duration;
           if (trackDuration > 31) {
             const seekPosition = trackDuration - 31;
             customLog('Seeking to position:', seekPosition);
-            await TrackPlayer.seekTo(seekPosition);
+            TrackPlayer.seekTo(seekPosition);
           }
         } catch (error) {
           customError('Error seeking in test mode:', error);
         }
       }
       
-      // Only auto-play on the very first load
       if (!hasAutoPlayedOnce.current) {
-        await TrackPlayer.play();
+        TrackPlayer.play();
         hasAutoPlayedOnce.current = true;
         customLog('TrackPlayer.play() called - first time auto-play');
       } else {
@@ -370,7 +356,7 @@ const useAudioPlayer = (onSongLoaded) => {
         
         // Auto-play the previous track after loading
         customLog('Auto-playing previous track from in-app navigation');
-        await TrackPlayer.play();
+        TrackPlayer.play();
       } else {
         customLog('No previous file available - previousFile was:', previousFile);
         // Debug: Check state after failed getPreviousFile
@@ -403,7 +389,7 @@ const useAudioPlayer = (onSongLoaded) => {
       
       // Auto-play the next track after loading
       customLog('Auto-playing next track from in-app navigation');
-      await TrackPlayer.play();
+      TrackPlayer.play();
     } finally {
       // Clear manual navigation flag after a delay
       setTimeout(() => {
@@ -414,21 +400,20 @@ const useAudioPlayer = (onSongLoaded) => {
     }
   }, 1000)).current;
 
-  const togglePlayback = async () => {
-    const currentState = await TrackPlayer.getState();
-    if (currentState === State.Playing) {
-      await TrackPlayer.pause();
+  const togglePlayback = () => {
+    if (TrackPlayer.isPlaying()) {
+      TrackPlayer.pause();
     } else {
-      await TrackPlayer.play();
+      TrackPlayer.play();
     }
   };
 
-  const seekBackward = async () => {
-    await TrackPlayer.seekBy(-15);
+  const seekBackward = () => {
+    TrackPlayer.seekBy(-15);
   };
 
-  const seekForward = async () => {
-    await TrackPlayer.seekBy(30);
+  const seekForward = () => {
+    TrackPlayer.seekBy(30);
   };
 
   const seekTo = async (positionInSeconds) => {
@@ -457,10 +442,9 @@ const useAudioPlayer = (onSongLoaded) => {
 
   const saveCurrentState = async () => {
     try {
-      const currentProgress = await TrackPlayer.getProgress();
-      const currentTrack = await TrackPlayer.getActiveTrackIndex();
-      if (currentTrack !== null && currentTrack !== undefined) {
-        const trackObject = await TrackPlayer.getTrack(currentTrack);
+      const currentProgress = TrackPlayer.getProgress();
+      const trackObject = TrackPlayer.getActiveMediaItem();
+      if (trackObject?.url) {
         await StorageManager.setItem('lastSongUrl', trackObject.url);
         customLog('Saved current state', trackObject.url );
         if (currentProgress.position) {
@@ -480,13 +464,13 @@ const useAudioPlayer = (onSongLoaded) => {
     }
     
     watchdogIntervalRef.current = setInterval(async () => {
-      const playerState = await TrackPlayer.getState();
-      if (playerState === State.Ready && !hasAutoPlayedOnce.current) {
+      const playerState = TrackPlayer.getPlaybackState();
+      if (playerState === PlaybackState.Ready && !TrackPlayer.isPlaying() && !hasAutoPlayedOnce.current) {
         customLog('Player ready but not playing, attempting to resume (first load only)');
         await ensureAudioSessionActive();
-        await TrackPlayer.play();
+        TrackPlayer.play();
         hasAutoPlayedOnce.current = true;
-      } else if (playerState === State.Ready) {
+      } else if (playerState === PlaybackState.Ready && !TrackPlayer.isPlaying()) {
         customLog('Player ready but not auto-resuming (not first load)');
       }
     }, 5000); // Check every 5 seconds
@@ -534,7 +518,7 @@ const useAudioPlayer = (onSongLoaded) => {
           await loadFile(lastSongUrl);
           if (lastSongPosition) {
             const savedPosition = Number(lastSongPosition);
-            await TrackPlayer.seekBy(savedPosition);
+            TrackPlayer.seekTo(savedPosition);
             customLog('Seeked to saved position:', savedPosition);
           }
         } else {
@@ -577,10 +561,9 @@ const useAudioPlayer = (onSongLoaded) => {
     
     const saveProgress = async () => {
       try {
-        const currentProgress = await TrackPlayer.getProgress();
-        const currentTrack = await TrackPlayer.getActiveTrackIndex();
-        if (currentTrack !== null && currentTrack !== undefined) {
-          const trackObject = await TrackPlayer.getTrack(currentTrack);
+        const currentProgress = TrackPlayer.getProgress();
+        const trackObject = TrackPlayer.getActiveMediaItem();
+        if (trackObject?.url) {
           await StorageManager.setItem('lastSongUrl', trackObject.url);
           if (currentProgress.position) {
             await StorageManager.setItem('lastSongPosition', currentProgress.position.toString());
@@ -611,19 +594,16 @@ const useAudioPlayer = (onSongLoaded) => {
           // Reset any track ended state that might be corrupted
           setIsTrackEnded(false);
           
-          const trackDuration = await TrackPlayer.getDuration();
+          const trackDuration = TrackPlayer.getProgress().duration;
           if (trackDuration > 31) {
-            // Get current track info to prevent duplicate seeks
-            const currentTrack = await TrackPlayer.getActiveTrackIndex();
-            const trackObject = await TrackPlayer.getTrack(currentTrack);
-            const trackUrl = trackObject?.url;
+            const trackUrl = TrackPlayer.getActiveMediaItem()?.url;
             
             // Only seek if we haven't already seeked this track recently
             const now = Date.now();
             if (!trackUrl || !lastTestModeSeek.current[trackUrl] || now - lastTestModeSeek.current[trackUrl] > 2000) {
               const seekPosition = trackDuration - 31;
               customLog('Seeking to position:', seekPosition, 'for track:', trackUrl);
-              await TrackPlayer.seekTo(seekPosition);
+              TrackPlayer.seekTo(seekPosition);
               
               if (trackUrl) {
                 lastTestModeSeek.current[trackUrl] = now;
@@ -684,11 +664,7 @@ const useAudioPlayer = (onSongLoaded) => {
         nextTrackUrl.current = nextFile;
         
         // Add to queue but don't start playing
-        await TrackPlayer.add({
-          id: 'next',
-          url: nextFile,
-          title: nextFile.split('/').pop().replace(/\.mp3$/, ''),
-        });
+        TrackPlayer.addMediaItem(mediaItemFromUrl(nextFile, 'next'));
         customLog('Next track preloaded successfully');
       } else {
         customLog('Next track already preloaded, skipping');

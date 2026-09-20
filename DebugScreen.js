@@ -15,9 +15,9 @@ const DebugScreen = ({ onClose, isTestMode, toggleTestMode, audioPlayerData }) =
     migrationComplete: false
   });
 
-  const copyLogsToClipboard = () => {
+  const copyLogsToClipboard = async () => {
     const logText = logs.map(log => `${log.timestamp} [${log.type}] ${log.message}`).join('\n');
-    Clipboard.setString(logText);
+    await Clipboard.setStringAsync(logText);
   };
 
   const fetchLogs = async () => {

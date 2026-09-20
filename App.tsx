@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, SafeAreaView, StyleSheet, Text, AppState, Platform, TouchableOpacity, AppStateStatus } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Text, AppState, TouchableOpacity, AppStateStatus } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
-import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import * as Font from 'expo-font';
 import useAudioPlayer from './useAudioPlayer';
 import BasicMusicPlayer from './BasicMusicPlayer';
 import DebugScreen from './DebugScreen';
 import SplashScreen from './SplashScreen';
 import { registerBackgroundFetch, unregisterBackgroundFetch } from './backgroundFetch';
-import { customLog, customError } from './customLogger';
+import { customError } from './customLogger';
+import { registerPlayerEventListeners } from './service';
 
 const loadFonts = async () => {
   try {
@@ -22,27 +21,9 @@ const loadFonts = async () => {
   }
 };
 
-const setupPlayer = async () => {
+const setupPlayer = () => {
   try {
-    await TrackPlayer.setupPlayer({});
-    await TrackPlayer.updateOptions({
-      android: {
-        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
-      },
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-        Capability.SeekTo,
-      ],
-      compactCapabilities: [Capability.Play, Capability.Pause, Capability.SkipToNext, Capability.SkipToPrevious],
-      progressUpdateEventInterval: 1,
-    });
-
-    if (Platform.OS === 'android') {
-      await TrackPlayer.setPlayWhenReady(true);
-    }
+    registerPlayerEventListeners();
   } catch (e) {
     customError('Error setting up player:', e);
   }
